@@ -12,7 +12,7 @@ Full-stack: owner picks exactly one sitter per task.
 ## Acceptance criteria
 - [ ] `GET /pawtrust/applications?ownerId=` returns applications for the owner's tasks
 - [ ] `POST /pawtrust/accept` `{ applicationId, taskId }`: chosen → `accepted`, others → `rejected`, task → `assigned` + `acceptedSitterId`
-- [ ] Only the task owner can accept (403); task already assigned → 409; uses a conditional update so concurrent accepts cannot both succeed (BR-4)
+- [ ] Only the task owner can accept (403); task already assigned → 409; runs in a MongoDB transaction with a conditional task update so concurrent accepts cannot both succeed and application statuses stay consistent (BR-4)
 - [ ] TaskList shows applicant name + message, Accept button; after accept: "Accepted" / "Not selected" pills
-- [ ] Supertest for accept rules; RTL test for pill states
+- [ ] Supertest for accept rules, incl. two concurrent accepts via `Promise.all` → exactly one 200 and one 409; RTL test for pill states
 - [ ] Code follows AGENTS.md; PR links this issue with `Closes #<n>` and is approved by teammate

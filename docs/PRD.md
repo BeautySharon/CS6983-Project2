@@ -5,7 +5,7 @@
 | **Product** | PawTrust — trusted pet-sitting marketplace |
 | **Team** | Member A (`@member-a`), Member B (`@member-b`) <!-- TODO: replace with GitHub usernames --> |
 | **Version** | v1.0 (P2) |
-| **Timeline** | Sprint 1: Oct 27 – Nov 9, 2026 · Sprint 2: Nov 10 – Nov 23, 2026 <!-- TODO: adjust to course timeline --> |
+| **Timeline** | Sprint 1: Oct 27 – Nov 4, 2026 · Sprint 2: Nov 5 – Nov 13, 2026 · **Project due: Nov 13, 2026** |
 | **Mockups** | `docs/mockups/` — see §6 for page ↔ story mapping <!-- TODO: add Claude Artifact / Figma link --> |
 
 ---
@@ -193,7 +193,7 @@ Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken. Runs locall
 | BR-1 | Task status only moves forward: `open` → `assigned` → `finished`. | 400 |
 | BR-2 | Owner can edit or delete a task only while it is `open`. `assigned` and `finished` tasks are locked. | 400 |
 | BR-3 | Sitters can apply only to `open` tasks, once per task, and never to their own account's tasks. | 400 / 409 |
-| BR-4 | Accept is atomic: the task update uses a conditional `{ _id, status: "open" }` filter, so if two accepts race only the first succeeds. | 409 for the loser |
+| BR-4 | Accept is atomic: the task update uses a conditional `{ _id, status: "open" }` filter inside a transaction that also updates the applications, so if two accepts race only the first succeeds and application statuses always match the assigned sitter. | 409 for the loser |
 | BR-5 | Only the accepted sitter can mark a task finished. Marking an already-finished task again is a no-op that returns 409 (the button is disabled after the first click). | 403 / 409 |
 | BR-6 | Only the task's owner can review, only when the task is `finished`, once per task. | 403 / 400 / 409 |
 | BR-7 | Role is enforced on the server: owner-only and sitter-only endpoints reject the other role. | 403 |
@@ -202,8 +202,8 @@ Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken. Runs locall
 
 | Sprint | Dates | Goal | Stories |
 |---|---|---|---|
-| Sprint 1 | Oct 27 – Nov 9 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 + chores #1, #2 |
-| Sprint 2 | Nov 10 – Nov 23 | Full matching loop + reviews | US-7 – US-12 |
+| Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 + chores #1, #2 |
+| Sprint 2 | Nov 5 – Nov 13 | Full matching loop + reviews | US-7 – US-12 |
 | Future | — | Descoped for P2 | US-6, US-13, cloud deployment |
 
 ## 10. Success Metrics

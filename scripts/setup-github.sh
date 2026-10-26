@@ -11,8 +11,8 @@ set -euo pipefail
 
 : "${REPO:?set REPO=owner/repo}"
 OWNER="${REPO%%/*}"
-SPRINT1_DUE="${SPRINT1_DUE:-2026-11-09}"
-SPRINT2_DUE="${SPRINT2_DUE:-2026-11-23}"
+SPRINT1_DUE="${SPRINT1_DUE:-2026-11-04}"
+SPRINT2_DUE="${SPRINT2_DUE:-2026-11-13}"
 PROJECT_TITLE="${PROJECT_TITLE:-PawTrust Scrum Board}"
 ISSUE_DIR="$(dirname "$0")/../docs/issues"
 

@@ -26,7 +26,7 @@ mark accepted tasks as finished, and receive reviews.
 | Styling  | Tailwind CSS                           | 3.4     |
 | Backend  | Node.js + Express (ES modules)         | Express 4 |
 | Database | MongoDB Atlas via official `mongodb` driver (no Mongoose) | 5.x |
-| Auth     | bcrypt password hashing                | 6       |
+| Auth     | bcrypt (password hashing) + jsonwebtoken (JWT) | bcrypt 6, jsonwebtoken 9 |
 | Testing  | Mocha + Chai + Supertest (backend), Vitest + React Testing Library (frontend) | — |
 
 ### Architecture
@@ -98,7 +98,51 @@ pawtrust-frontend/src/
 - **Frontend:** Vitest + React Testing Library in `src/**/__tests__/*.test.jsx`.
   Test rendering + user interaction of components (mock `fetch`).
 - **Coverage goal:** ≥ 70% on DAOs and controllers touched by a PR.
+- Auth: every protected endpoint has tests for 401 (no/invalid/expired token) and 403 (wrong role / not the owner).
+- Concurrency: the accept endpoint has a test that fires two accepts for the same task with `Promise.all`
+  and asserts exactly one 200, one 409, and exactly one `accepted` application.
+- Transactions need a replica set: run backend tests against the Atlas test database, not a standalone local `mongod`.
 - A feature is not "done" until its tests pass.
+
+### Authentication (JWT) — the only auth mechanism
+
+**Server**
+- `POST /pawtrust/login` returns `{ token, user }`. Token payload: `{ sub: <userId>, userType }`,
+  signed with `process.env.JWT_SECRET` (HS256), `expiresIn: "1d"`. Never put email, password or bio in the payload.
+- `api/middleware/auth.js` exports:
+  - `requireAuth` — reads `Authorization: Bearer <token>`, verifies it, sets `req.user = { id, userType }`.
+    Missing, malformed, invalid or expired token → `401 { error: "Unauthorized" }`.
+  - `requireRole(...roles)` — `403 { error: "Forbidden" }` if `req.user.userType` is not allowed.
+- Route wiring in `pawtrust.route.js`: `router.post("/tasks", requireAuth, requireRole("owner"), TasksController.apiPostTask)`.
+  Public routes are only `/register`, `/login`, `/health`.
+- **The acting user always comes from `req.user`.** `ownerId` on a new task = `req.user.id`;
+  `sitterId` on a new application = `req.user.id`; ownership checks compare the stored id with `req.user.id`.
+  If the client sends `ownerId`, `sitterId` or `userType` in the body, ignore it.
+- `passwordHash` is never returned in any response (strip it in the DAO or controller).
+
+**Client**
+- Store the token and user in `localStorage` under the keys `pawtrust.token` and `pawtrust.user` — nowhere else
+  (no cookies, no sessionStorage, no React-only state).
+- All API calls go through one helper, `src/api/client.js` → `apiFetch(path, options)`, which adds
+  `Authorization: Bearer <token>`. Components never call `fetch` directly.
+- On any `401`, `apiFetch` clears both keys and redirects to `/`.
+- The frontend role check (`ProtectedRoute` for `/owner` and `/sitter`) is only for UX. The server is the source of truth.
+- Because the token lives in `localStorage`, XSS is the main risk: never use `dangerouslySetInnerHTML`, never render user input as HTML.
+
+### State changes & concurrency (MongoDB)
+
+- Every status transition is an **atomic conditional update** that includes the expected current state in the filter:
+  `tasks.updateOne({ _id, ownerId, status: "open" }, { $set: { status: "assigned", acceptedSitterId, updatedAt } })`.
+  If `matchedCount === 0`, return 409 (or 403/404 after checking why). Never "read, check in JS, then write".
+- **Accept (BR-4)** runs in a MongoDB transaction (`client.startSession()` + `session.withTransaction`) so that
+  `tasks` and `applications` stay consistent:
+  1. conditional update of the task `open → assigned` (fails → abort, 409)
+  2. chosen application `pending → accepted`
+  3. all other applications for the task → `rejected`
+- **Finish (BR-5):** `updateOne({ _id, acceptedSitterId: req.user.id, status: "assigned" }, { $set: { status: "finished" } })`.
+- **Review (BR-6):** rely on the unique index on `reviews.taskId`; translate duplicate-key error `11000` into 409.
+- DAOs expose the `MongoClient` they were injected with so controllers can start a session via the DAO,
+  never by importing `mongodb` themselves.
 
 ---
 
