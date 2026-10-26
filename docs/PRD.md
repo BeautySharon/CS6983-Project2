@@ -5,7 +5,7 @@
 | **Product** | PawTrust — trusted pet-sitting marketplace |
 | **Team** | Member A — `BeautySharon` (backend-focused) · Member B — `Gingobell` (frontend-focused) |
 | **Version** | v1.0 (P2) |
-| **Timeline** | Sprint 1: Oct 27 – Nov 4, 2026 · Sprint 2: Nov 5 – Nov 13, 2026 · **Project due: Nov 13, 2026** |
+| **Timeline** | Sprint 1: Oct 27 – Nov 4, 2026 · Sprint 2: Nov 5 – Nov 12, 2026 · **Project due: Nov 12, 2026** |
 | **Mockups** | `docs/mockups/` — see §6 for page ↔ story mapping <!-- TODO: add Claude Artifact / Figma link --> |
 
 ---
@@ -203,7 +203,7 @@ Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken. Runs locall
 | Sprint | Dates | Goal | Stories |
 |---|---|---|---|
 | Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 + chores #1, #2 |
-| Sprint 2 | Nov 5 – Nov 13 | Full matching loop + reviews | US-7 – US-12 |
+| Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews | US-7 – US-12 |
 | Future | — | Descoped for P2 | US-6, US-13, cloud deployment |
 
 ## 10. Success Metrics
