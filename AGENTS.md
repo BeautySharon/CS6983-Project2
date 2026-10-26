@@ -63,10 +63,14 @@ pawtrust-frontend/src/
 
 ### Data model (MongoDB collections)
 
-- `users`: `{ name, email, passwordHash, userType: "owner" | "sitter", location, bio }`
-- `tasks`: `{ owner_id, petType, description, date, duration, location, status, acceptedSitterId, createdAt, updatedAt }`
+<!-- Full model, constraints and business rules: docs/PRD.md §8 -->
+- `users`: `{ name, email (unique), passwordHash, userType: "owner" | "sitter", location, bio }`
+- `tasks`: `{ ownerId, petType, description, date, duration, location, status, acceptedSitterId, reviewed, createdAt, updatedAt }`
   - `status` lifecycle: `open` → `assigned` → `finished`
-- `applications`: `{ taskId, sitterId, message, status: "pending" | "accepted" | "rejected", createdAt }`
+- `applications`: `{ taskId, sitterId, message, status: "pending" | "accepted" | "rejected", createdAt }` — unique `(taskId, sitterId)`
+- `reviews`: `{ taskId (unique), ownerId, sitterId, rating: 1–5, comment, createdAt }`
+- Enforce business rules BR-1…BR-7 (PRD §8) on the server; state changes use conditional updates
+  (e.g. `updateOne({ _id, status: "open" }, ...)`) so races cannot break them.
 
 ### Naming conventions
 
@@ -122,7 +126,7 @@ pawtrust-frontend/src/
 | --- | --- | --- |
 | `LoginPage` / `RegisterPage` | `/`, `/register` | Email + password; register picks role Owner/Sitter. On login store `userId` and route to `/owner` or `/sitter`. |
 | `PostTaskForm` | Owner dashboard, left | Fields: petType, description, date, duration, location. Calls `onCreated` on success. |
-| `TaskList` | Owner dashboard, right | Owner's tasks newest-first; each shows applications with **Accept**. Once one is accepted, others show "Not selected". Delete hidden for finished tasks. |
+| `TaskList` | Owner dashboard, right | Owner's tasks newest-first; each shows applications with **Accept**. Once one is accepted, others show "Not selected". Delete shown only for `open` tasks (BR-2). |
 | `AvailableTasks` | Sitter dashboard | Open tasks with optional message + **Apply**; applied tasks show "Applied". |
 | `AcceptedTasks` | Sitter dashboard | Tasks where this sitter was accepted; **Mark finished** button. |
 
@@ -169,7 +173,7 @@ pawtrust-frontend/src/
 
 ### Referencing issues in code
 
-- TODOs must reference an issue: `// TODO(#15): add JWT auth middleware`.
+- TODOs must reference an issue: `// TODO(#12): handle double-click on Mark finished`.
 - Don't leave TODOs without an issue number.
 
 ---
@@ -193,7 +197,8 @@ pawtrust-frontend/src/
 - ❌ Don't query MongoDB from controllers or put business logic in routes.
 - ❌ Don't hardcode URLs — use `BASE_URL` from `src/config.js`.
 - ❌ Don't commit secrets: `.env` files stay git-ignored; DB URIs only in env vars.
-- ❌ Don't trust client-sent ids for authorization alone. <!-- Until JWT middleware (US-3) lands, ids come from the session; after it, use `req.user` only -->
+- ❌ Don't read the acting user's id or role from `req.body`/params — use `req.user` set by the `requireAuth` JWT middleware.
+- ❌ Don't mix auth mechanisms: JWT only, no server sessions or cookies.
 - ❌ Don't return `passwordHash` or store plain passwords.
 - ❌ Don't rewrite unrelated files or reformat whole files.
 

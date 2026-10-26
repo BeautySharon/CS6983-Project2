@@ -11,7 +11,7 @@ Full-stack: sitter completes a job.
 
 ## Acceptance criteria
 - [ ] `AcceptedTasks` column lists tasks where this sitter is accepted and status ≠ finished
-- [ ] `POST /pawtrust/tasks/:taskId/finish` sets status `finished`; only accepted sitter (403 otherwise)
+- [ ] `POST /pawtrust/tasks/:taskId/finish` sets status `finished`; only accepted sitter (403 otherwise); already finished → 409 and the button is disabled after the first click (BR-5)
 - [ ] Finished task leaves the Accepted column without page reload
 - [ ] Supertest for finish rules; RTL test for the button
 - [ ] Code follows AGENTS.md; PR links this issue with `Closes #<n>` and is approved by teammate

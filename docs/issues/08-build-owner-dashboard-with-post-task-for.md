@@ -14,7 +14,7 @@ Owner UI, matching `docs/mockups/ownerdashboard.png`.
 - [ ] `PostTaskForm` with labeled inputs + client-side validation; calls `onCreated` on success
 - [ ] `TaskList` shows owner's tasks newest first, 3 per page with Prev / Page x of y / Next
 - [ ] Each task shows pet type, date, duration, location, status pill, application count
-- [ ] Delete button with confirm; hidden for finished tasks
+- [ ] Delete button with confirm; shown only for `open` tasks (BR-2)
 - [ ] RTL tests for PostTaskForm submit and TaskList pagination
 - [ ] Code follows AGENTS.md; PR links this issue with `Closes #<n>` and is approved by teammate
 

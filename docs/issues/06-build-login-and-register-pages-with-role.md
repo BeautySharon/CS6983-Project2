@@ -13,7 +13,7 @@ Frontend for authentication, matching `docs/mockups/login.png`.
 - [ ] Routes: `/` (login), `/register`, `/owner`, `/sitter`
 - [ ] Register form: name, email, password, role select, location, bio — all inputs labeled
 - [ ] Shows API error messages inline
-- [ ] On login, stores session (`userId`, `userType`) and redirects by role
+- [ ] On login, stores the JWT and user, sends `Authorization: Bearer <token>` on API calls, and redirects by role; a 401 response logs the user out
 - [ ] Logged-out user visiting `/owner` or `/sitter` is redirected to `/`; Logout button clears session
 - [ ] RTL tests: form validation message, redirect after successful login (mock fetch)
 - [ ] Code follows AGENTS.md; PR links this issue with `Closes #<n>` and is approved by teammate

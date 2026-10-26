@@ -6,7 +6,7 @@
 | **Team** | Member A (`@member-a`), Member B (`@member-b`) <!-- TODO: replace with GitHub usernames --> |
 | **Version** | v1.0 (P2) |
 | **Timeline** | Sprint 1: Oct 27 – Nov 9, 2026 · Sprint 2: Nov 10 – Nov 23, 2026 <!-- TODO: adjust to course timeline --> |
-| **Mockups** | `docs/mockups/` (login, owner dashboard, sitter dashboard) <!-- TODO: add Claude Artifact / Figma link --> |
+| **Mockups** | `docs/mockups/` — see §6 for page ↔ story mapping <!-- TODO: add Claude Artifact / Figma link --> |
 
 ---
 
@@ -48,19 +48,16 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 - [ ] Password is stored as a bcrypt hash, never in plain text
 - [ ] On success the user is redirected to login (or logged in directly)
 
-**US-2 (P0) Log in / log out**
-> As a registered user, I want to log in so that I can access my dashboard.
+**US-2 (P0) Log in / log out with token authentication**
+> As a registered user, I want to log in securely so that I can access my dashboard and nobody can act on my behalf.
 - [ ] Wrong email or password shows an error without revealing which one was wrong
-- [ ] On success, Owner → `/owner`, Sitter → `/sitter`
-- [ ] Session persists across page refresh
-- [ ] Logout clears the session and returns to `/`
-- [ ] Visiting a dashboard while logged out redirects to `/`
+- [ ] Login returns a signed JWT (1-day expiry) plus the user (without `passwordHash`)
+- [ ] Protected endpoints require `Authorization: Bearer <token>`; missing/invalid/expired token → 401
+- [ ] The server takes user id and role from the token (`req.user`), never from the request body
+- [ ] On success, Owner → `/owner`, Sitter → `/sitter`; session (token) persists across page refresh
+- [ ] Logout clears the token and returns to `/`; visiting a dashboard while logged out redirects to `/`
 
-**US-3 (P1) Secure API with tokens**
-> As a user, I want my account protected so that nobody can act on my behalf.
-- [ ] Login returns a JWT; protected endpoints require `Authorization: Bearer <token>`
-- [ ] User id and role are taken from the token, not from the request body
-- [ ] Expired/invalid token returns 401
+> US-3 (separate token story) was merged into US-2 so that authentication is designed once, in Sprint 1.
 
 ### Epic B — Owner: Task Management
 
@@ -147,6 +144,14 @@ Task status lifecycle: `open` → `assigned` → `finished` (→ `reviewed: true
 
 ## 6. Mockup / Design Summary
 
+| Page | Mockup | Related stories |
+|---|---|---|
+| Login / Register | `docs/mockups/login.png` | US-1, US-2 |
+| Owner Dashboard | `docs/mockups/ownerdashboard.png` | US-4, US-5, US-9, US-11 |
+| Sitter Dashboard | `docs/mockups/sitterdashboard.png` | US-7, US-8, US-10, US-12 |
+
+When implementing a UI story, match layout, colors and component states to the mockup listed here.
+
 - **Login page:** centered card on indigo→sky gradient, email + password, link to register.
 - **Owner dashboard:** left column "Post a new task" form card; right column "My Tasks"
   list with per-task applications and Accept buttons; pagination at bottom.
@@ -157,7 +162,7 @@ Task status lifecycle: `open` → `assigned` → `finished` (→ `reviewed: true
 
 ## 7. Non-functional Requirements
 
-- **Security:** bcrypt password hashing, JWT auth (US-3), server-side ownership checks, no secrets in git.
+- **Security:** bcrypt password hashing, JWT auth (US-2) as the single auth mechanism, server-side ownership checks, no secrets in git.
 - **Accessibility:** labeled inputs, keyboard navigation, visible focus, AA contrast.
 - **Quality:** automated tests for every API endpoint; CI runs lint + tests on each PR.
 - **Performance:** dashboard loads in < 2 s on a typical connection.
@@ -165,18 +170,44 @@ Task status lifecycle: `open` → `assigned` → `finished` (→ `reviewed: true
 ## 8. Tech Stack
 
 React 19 + Vite + Tailwind CSS · Node.js + Express · MongoDB Atlas (native driver, DAO pattern) ·
-Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · Google Cloud App Engine.
+Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken. Runs locally (no cloud deployment in P2).
+
+### Technical Notes — Data Model
+
+| Collection | Key fields | References |
+|---|---|---|
+| `users` | `_id, name, email, passwordHash, userType ("owner"\|"sitter"), location, bio, createdAt` | — |
+| `tasks` | `_id, ownerId, petType, description, date, duration, location, status, acceptedSitterId, reviewed, createdAt, updatedAt` | `ownerId`, `acceptedSitterId` → users |
+| `applications` | `_id, taskId, sitterId, message, status ("pending"\|"accepted"\|"rejected"), createdAt` | `taskId` → tasks, `sitterId` → users |
+| `reviews` | `_id, taskId, ownerId, sitterId, rating (1–5), comment, createdAt` | `taskId` → tasks, `ownerId`/`sitterId` → users |
+
+**Constraints (unique indexes, created at startup):**
+- `users.email` unique
+- `applications (taskId, sitterId)` unique — one application per sitter per task
+- `reviews.taskId` unique — one review per task
+
+### Business Rules
+
+| # | Rule | Error |
+|---|---|---|
+| BR-1 | Task status only moves forward: `open` → `assigned` → `finished`. | 400 |
+| BR-2 | Owner can edit or delete a task only while it is `open`. `assigned` and `finished` tasks are locked. | 400 |
+| BR-3 | Sitters can apply only to `open` tasks, once per task, and never to their own account's tasks. | 400 / 409 |
+| BR-4 | Accept is atomic: the task update uses a conditional `{ _id, status: "open" }` filter, so if two accepts race only the first succeeds. | 409 for the loser |
+| BR-5 | Only the accepted sitter can mark a task finished. Marking an already-finished task again is a no-op that returns 409 (the button is disabled after the first click). | 403 / 409 |
+| BR-6 | Only the task's owner can review, only when the task is `finished`, once per task. | 403 / 400 / 409 |
+| BR-7 | Role is enforced on the server: owner-only and sitter-only endpoints reject the other role. | 403 |
 
 ## 9. Release Plan
 
 | Sprint | Dates | Goal | Stories |
 |---|---|---|---|
-| Sprint 1 | Oct 27 – Nov 9 | Foundation + accounts + owner task management | US-1, US-2, US-4, US-5 |
+| Sprint 1 | Oct 27 – Nov 9 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 + chores #1, #2 |
 | Sprint 2 | Nov 10 – Nov 23 | Full matching loop + reviews | US-7 – US-12 |
-| Future | — | Descoped for P2 (issues #15–#18 closed as not planned) | US-3, US-6, US-13, deployment |
+| Future | — | Descoped for P2 | US-6, US-13, cloud deployment |
 
 ## 10. Success Metrics
 
-- All P0 stories demoed end-to-end on the deployed app.
+- All P0 stories demoed end-to-end on the local development environment.
 - ≥ 70% test coverage on backend controllers/DAOs.
 - 0 open `priority:high` bugs at the end of Sprint 2.
