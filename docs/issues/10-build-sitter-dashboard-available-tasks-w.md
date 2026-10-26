@@ -7,7 +7,7 @@ owner: B
 Sitter UI, matching `docs/mockups/sitterdashboard.png`.
 
 **User story:** US-7, US-8  
-**Owner:** Member B
+**Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria
 - [ ] Three-column layout (Available / Accepted / Finished & Reviews); single column on mobile

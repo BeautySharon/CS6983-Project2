@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Product** | PawTrust — trusted pet-sitting marketplace |
-| **Team** | Member A (`@member-a`), Member B (`@member-b`) <!-- TODO: replace with GitHub usernames --> |
+| **Team** | Member A — `BeautySharon` (backend-focused) · Member B — `Gingobell` (frontend-focused) |
 | **Version** | v1.0 (P2) |
 | **Timeline** | Sprint 1: Oct 27 – Nov 4, 2026 · Sprint 2: Nov 5 – Nov 13, 2026 · **Project due: Nov 13, 2026** |
 | **Mockups** | `docs/mockups/` — see §6 for page ↔ story mapping <!-- TODO: add Claude Artifact / Figma link --> |

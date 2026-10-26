@@ -6,6 +6,20 @@
   ask before deviating. Keep this file updated when conventions change.
 -->
 
+## 0. Before Implementing a Feature
+
+Follow these steps for every task, in order, and report on each in your final message:
+
+1. **Read the GitHub Issue** and its acceptance criteria. No issue number → ask for one.
+2. **Read the linked user story** in `docs/PRD.md` and the business rules (BR-x) it touches.
+3. **Open the mockup** for the page (`docs/mockups/`, mapping in PRD §6) before writing UI.
+4. **Follow the architecture** below: route → controller → DAO; pages fetch via `apiFetch`, components get props.
+5. **Change only files in the issue's scope.** List any file you had to touch outside it and why.
+6. **Write tests** per the Testing strategy (400 / 401 / 403 / 409 cases where applicable).
+7. **Run `npm run lint` and `npm test`** in each app you changed and paste the result summary.
+   If something fails, say so — never claim it passes without running it.
+8. End with a checklist of the acceptance criteria, marking each one done or not done.
+
 ## 1. Project Context
 
 **PawTrust** is a MERN web app connecting **pet owners** with **pet sitters**.
@@ -40,11 +54,16 @@ pawtrust-backend/
     *.controller.js   # HTTP layer: parse req, call DAO, send res
   dao/
     *DAO.js           # Data layer: the ONLY place that touches MongoDB
+  api/middleware/
+    auth.js           # requireAuth, requireRole (JWT)
+  scripts/seed.js     # creates dummy test accounts in the local/test DB
   test/               # Mocha tests (*.test.js)
+  .env.example        # every required env var, no real values
 
 pawtrust-frontend/src/
   App.jsx             # route table
   config.js           # BASE_URL (from VITE_API_BASE_URL)
+  api/client.js       # apiFetch: the ONLY place that calls fetch; adds the JWT
   pages/              # one file per route (LoginPage, OwnerDashboard, ...)
   components/         # reusable UI pieces used by pages
 ```
@@ -85,7 +104,8 @@ pawtrust-frontend/src/
 
 - ES modules only (`import`/`export`), `async/await` (no `.then` chains).
 - Error responses: `res.status(<code>).json({ error: "<message>" })`; log with `console.error`.
-- Status codes: 400 bad input, 401 bad credentials, 403 not allowed, 404 not found, 500 server error.
+- Status codes: 400 bad input or invalid state transition, 401 missing/invalid/expired token or bad credentials,
+  403 wrong role or not the owner, 404 not found, 409 conflict (duplicate or concurrent change), 500 server error.
 - Never return `passwordHash` to the client.
 - Run `npm run lint` in `pawtrust-frontend` before committing; no unused imports.
 - User-facing text is in **English**. Code comments in English.
@@ -94,7 +114,13 @@ pawtrust-frontend/src/
 
 - **Backend:** Mocha + Chai + Supertest in `pawtrust-backend/test/*.test.js`, run with `npm test`.
   Test `app` from `server.js` against a separate test database (`PawTrust_db=pawtrust_test`).
-  Every new endpoint needs tests for: success path, invalid input (400), and authorization failure (403) where applicable.
+  Every protected endpoint must have tests for:
+  - successful operation
+  - invalid input (400)
+  - missing, invalid, or expired JWT (401)
+  - forbidden role or ownership (403)
+  - conflict or invalid state transition (409), where applicable
+  Tests create their own data with fixtures and clean up only the test database — never the dev database.
 - **Frontend:** Vitest + React Testing Library in `src/**/__tests__/*.test.jsx`.
   Test rendering + user interaction of components (mock `fetch`).
 - **Coverage goal:** ≥ 70% on DAOs and controllers touched by a PR.
@@ -151,7 +177,6 @@ pawtrust-frontend/src/
 - **PRD:** [`docs/PRD.md`](docs/PRD.md) — user stories US-1…US-13 with acceptance criteria.
   Each GitHub Issue references its user story; read the story before implementing.
 - **Mockups:** `docs/mockups/` (`login.png`, `ownerdashboard.png`, `sitterdashboard.png`)
-  <!-- TODO: add Claude Artifact / Figma link here -->
 - **User guide:** https://docs.google.com/document/d/1Iss2T72vSEq4-krnOlWMqNabvPXAXoBrTseXnCKdLxE/edit
 
 ### Visual design (match the mockups)
@@ -162,13 +187,15 @@ pawtrust-frontend/src/
 - Destructive button: `ring-1 ring-rose-300 text-rose-700 hover:bg-rose-50`.
 - Status pills: `text-xs px-2 py-1 rounded-full ring-1` — emerald for accepted/finished, slate for neutral.
 - Desktop: 12-column grid (`grid grid-cols-1 lg:grid-cols-12 gap-6`); must collapse to one column on mobile.
-- Lists paginate client-side with Prev / "Page x / y" / Next.
+- Pagination is **client-side**: list endpoints return the full list for the current user, and the
+  page component slices it (Owner "My Tasks": 3 per page) with Prev / "Page x / y" / Next.
+  Do not add `page`/`limit` query params unless an issue asks for server-side pagination.
 
 ### Key UI components
 
 | Component | Where | Behavior |
 | --- | --- | --- |
-| `LoginPage` / `RegisterPage` | `/`, `/register` | Email + password; register picks role Owner/Sitter. On login store `userId` and route to `/owner` or `/sitter`. |
+| `LoginPage` / `RegisterPage` | `/`, `/register` | Email + password; register picks role Owner/Sitter. On login store the JWT as `pawtrust.token` (and the user as `pawtrust.user`) in localStorage, then redirect by the authenticated `userType` (`owner` → `/owner`, `sitter` → `/sitter`). All later calls use `apiFetch`; a client-side `userId`/`userType` is never used for authorization. |
 | `PostTaskForm` | Owner dashboard, left | Fields: petType, description, date, duration, location. Calls `onCreated` on success. |
 | `TaskList` | Owner dashboard, right | Owner's tasks newest-first; each shows applications with **Accept**. Once one is accepted, others show "Not selected". Delete shown only for `open` tasks (BR-2). |
 | `AvailableTasks` | Sitter dashboard | Open tasks with optional message + **Apply**; applied tasks show "Applied". |
@@ -265,12 +292,18 @@ pawtrust-frontend/src/
 
 ```bash
 # backend (port from .env PORT, default 8000)
-cd pawtrust-backend && npm install && npm start
-# env: PawTrust_DB_URI, PawTrust_db, PORT
+cd pawtrust-backend && cp .env.example .env && npm install
+npm run seed      # dummy test accounts in the dev DB
+npm start
+# .env: PawTrust_DB_URI, PawTrust_db (e.g. pawtrust_dev), JWT_SECRET, PORT
+# tests: npm test   (uses PawTrust_db=pawtrust_test — a separate database)
 
 # frontend
 cd pawtrust-frontend && npm install && npm run dev
-# env: VITE_API_BASE_URL=http://localhost:<backend port>
+# .env: VITE_API_BASE_URL=http://localhost:<backend port>
 ```
 
-Test accounts: `owner1@gmail.com` / `sitter1@gmail.com`, password `88888888`.
+- Test accounts are created only by `scripts/seed.js` or test fixtures, with dummy credentials
+  (e.g. `owner1@example.com`). Never hardcode credentials in source code or docs, and never reuse them
+  in production or shared environments.
+- Dev data (`pawtrust_dev`) and test data (`pawtrust_test`) live in separate databases; tests may wipe only `pawtrust_test`.

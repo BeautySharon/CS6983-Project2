@@ -7,7 +7,7 @@ owner: A
 Full-stack: sitter completes a job.
 
 **User story:** US-10  
-**Owner:** Member A
+**Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria
 - [ ] `AcceptedTasks` column lists tasks where this sitter is accepted and status ≠ finished

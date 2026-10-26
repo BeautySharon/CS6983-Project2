@@ -7,7 +7,7 @@ owner: A
 `POST /pawtrust/register` creates an owner or sitter account.
 
 **User story:** US-1  
-**Owner:** Member A
+**Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria
 - [ ] `UsersDAO` with `injectDB`, `getUserByEmail`, `addUser`

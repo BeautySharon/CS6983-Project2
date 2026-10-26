@@ -7,7 +7,7 @@ owner: A
 Backend for owners managing their tasks. **This is the feature used for the with/without-rules comparison (assignment Task 3).**
 
 **User story:** US-4, US-5  
-**Owner:** Member A
+**Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria
 - [ ] `TasksDAO`: `addTask`, `getTasksByOwnerId`, `getTaskById`, `updateTask`, `deleteTask`

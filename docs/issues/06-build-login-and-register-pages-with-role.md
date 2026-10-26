@@ -7,7 +7,7 @@ owner: B
 Frontend for authentication, matching `docs/mockups/login.png`.
 
 **User story:** US-1, US-2  
-**Owner:** Member B
+**Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria
 - [ ] Routes: `/` (login), `/register`, `/owner`, `/sitter`

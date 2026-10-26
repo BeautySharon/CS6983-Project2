@@ -7,7 +7,7 @@ owner: B
 Every later feature must ship with tests, so the tooling comes first.
 
 **User story:** —  
-**Owner:** Member B
+**Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria
 - [ ] Backend: Mocha + Chai + Supertest, `npm test` runs `test/**/*.test.js`

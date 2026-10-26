@@ -7,7 +7,7 @@ owner: A
 Backend for sitters finding and applying to work.
 
 **User story:** US-7, US-8  
-**Owner:** Member A
+**Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria
 - [ ] `GET /pawtrust/tasks/available` returns only `open` tasks

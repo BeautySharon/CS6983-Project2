@@ -7,7 +7,7 @@ owner: B
 Full-stack review creation and display (merged from former #14, US-12).
 
 **User story:** US-11, US-12  
-**Owner:** Member B
+**Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria
 - [ ] `ReviewsDAO` + `POST /pawtrust/reviews` `{ taskId, rating, comment }`

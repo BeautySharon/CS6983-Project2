@@ -7,7 +7,7 @@ owner: B
 Owner UI, matching `docs/mockups/ownerdashboard.png`.
 
 **User story:** US-4, US-5  
-**Owner:** Member B
+**Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria
 - [ ] Two-column layout on desktop (form left, list right), single column on mobile

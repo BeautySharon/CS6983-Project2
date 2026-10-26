@@ -7,7 +7,7 @@ owner: A
 Give AI tools the project context (assignment Task 2).
 
 **User story:** —  
-**Owner:** Member A
+**Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria
 - [ ] `AGENTS.md` at repo root: stack, architecture, naming, testing, PRD/design refs, Scrum workflow, do's & don'ts

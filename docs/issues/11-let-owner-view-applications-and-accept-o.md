@@ -7,7 +7,7 @@ owner: B
 Full-stack: owner picks exactly one sitter per task.
 
 **User story:** US-9  
-**Owner:** Member B
+**Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria
 - [ ] `GET /pawtrust/applications?ownerId=` returns applications for the owner's tasks
