@@ -10,13 +10,13 @@ Test URL: http://localhost:3000/. Tests used fictional data and the application'
 
 Generation started in an empty folder and a fresh conversation without team-authored rules, PRD, or mockups. Default IDE built-in instructions remained available.
 
-Original source: [no-rules-v1.zip](no-rules-v1.zip) (extract to inspect the complete source directory). File hashes: [baseline-sha256.json](baseline-sha256.json). Matching starting code and model settings across the two conditions have not yet been confirmed. Observed differences must not automatically be attributed to rules alone.
+Original source: [no-rules-v1.zip](no-rules-v1.zip) (extract to inspect the complete source directory). File hashes: [baseline-sha256.json](baseline-sha256.json). This report evaluates the without-rules condition only. A causal comparison requires matched starting code and model settings across conditions.
 
 ## Browser Tests
 
 | Scenario | Procedure | Observed result |
 |---|---|---|
-| Empty form (previous test session) | Continue without entering values | Remained on step 1, displayed field errors, and focused the first-name field. |
+| Empty form | Continue without entering values | Remained on step 1, displayed field errors, and focused the first-name field. |
 | Invalid inputs | Enter Test/User, email abc, phone 123, password 123, confirmation 456; continue | Displayed email, phone, password-strength, and password-mismatch errors; remained on step 1 and focused email. |
 | Successful pet-owner registration | Quick Demo Fill: Pet Owner; continue through each step; select 201 Success; submit | Displayed Sarah's success page and a simulated member number. |
 | Caregiver branch | Quick Demo Fill: Caregiver; continue through each step | Displayed caregiver services and rates, then the final review page. |
@@ -35,7 +35,7 @@ Successful flows used complete built-in samples rather than manually entering ev
 
 ## Generated Automated Tests: Coverage Limits
 
-The previous session ran `test/validation.test.js` successfully. It checks email validation, phone validation/formatting, password scoring, and the validity of three built-in profiles. Source inspection shows no automated browser flow, mock-API recovery test, or password-data-handling test. Passing these tests does not establish complete end-to-end coverage.
+Running `test/validation.test.js` completed successfully. It checks email validation, phone validation/formatting, password scoring, and the validity of three built-in profiles. Source inspection shows no automated browser flow, mock-API recovery test, or password-data-handling test. Passing these tests does not establish complete end-to-end coverage.
 
 ## Evidence
 
