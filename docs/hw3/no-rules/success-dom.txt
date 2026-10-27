@@ -1,0 +1,42 @@
+- banner:
+  - link "PawTrust Home":
+    - /url: "#"
+    - generic: PawTrust
+  - generic "Form auto-saves locally":
+    - generic: Draft saved at 02:30 PM
+  - generic: "Server Mock:"
+  - combobox "Server Mock:":
+    - option "201 Success" [selected]
+    - option "409 Duplicate Email"
+    - option "500 Server Error"
+  - button "Quick Demo Fill":
+    - generic: Quick Demo Fill
+- main:
+  - heading "Create Your PawTrust Account" [level=1]
+  - paragraph: Join thousands of verified pet parents and certified neighborhood caregivers.
+  - generic: 100% ID Verified Caregivers
+  - generic: \$25,000 PawTrust Safety Guarantee
+  - generic: 24/7 Dedicated Vet & Trust Support
+  - generic: 🎉
+  - heading "Welcome to the PawTrust Pack!" [level=2]
+  - paragraph: Welcome to PawTrust, Sarah! Your member profile has been created.
+  - generic: "Member Number:"
+  - generic: PT-204848
+  - generic: •
+  - generic: 🐕 Pet Owner
+  - generic: ✉️
+  - generic: Verification Email Sent
+  - generic: Check your inbox to confirm your email and set up notification filters.
+  - generic: 🔍
+  - generic: Find Local Pet Help
+  - generic: Browse vetted dog walkers, sitters, and playmates within your radius.
+  - generic: 📱
+  - generic: Download Mobile App
+  - generic: Get instant booking notifications and live GPS updates during walks.
+  - generic: Submitted Registration Payload (API Response)
+  - button "Copy JSON"
+  - generic: "{ \"status\": 201, \"success\": true, \"user\": { \"id\": \"paw_nni0dyrt7\", \"memberNumber\": \"PT-204848\", \"registeredAt\": \"2026-10-27T21:30:57.741Z\", \"status\": \"active\", \"verificationStatus\": \"verified_basic\", \"accountType\": \"owner\", \"firstName\": \"Sarah\", \"lastName\": \"Jenkins\", \"email\": \"sarah.jenkins@example.com\", \"phone\": \"(555) 234-5678\", \"password\": \"••••••••••••\", \"confirmPassword\": \"PawPassword2026!\", \"selectedAvatar\": \"avatar-dog-lover\", \"streetAddress\": \"742 Evergreen Terrace\", \"city\": \"Portland\", \"state\": \"OR\", \"zipCode\": \"97201\", \"neighborhoodRadius\": \"10\", \"bio\": \"Loving pet parent working hybrid. Looking for reliable, kind neighbors who can walk Cooper during weekdays and take care of Luna when I travel for conferences.\", \"emergencyContactName\": \"David Jenkins (Brother)\", \"emergencyContactPhone\": \"(555) 987-6543\", \"pets\": [ { \"id\": \"pet_1\", \"name\": \"Cooper\", \"species\": \"dog\", \"breed\": \"Golden Retriever\", \"age\": \"3 years\", \"size\": \"large\", \"spayedNeutered\": true, \"temperament\": [ \"Friendly with Dogs\", \"Good with Kids\", \"High Energy\" ], \"medicalNotes\": \"Fully vaccinated. Takes flea/tick preventative monthly. Loves fetch and squeaky balls!\", \"vetClinic\": \"Rose City Animal Hospital\", \"vetPhone\": \"(555) 321-7788\" }, { \"id\": \"pet_2\", \"name\": \"Luna\", \"species\": \"cat\", \"breed\": \"Domestic Shorthair\", \"age\": \"5 years\", \"size\": \"small\", \"spayedNeutered\": true, \"temperament\": [ \"Shy with Strangers\", \"Calm & Gentle\" ], \"medicalNotes\": \"Indoor-only cat. Needs dry food in morning, wet food at 6 PM. Shy for the first 10 minutes.\", \"vetClinic\": \"Rose City Animal Hospital\", \"vetPhone\": \"(555) 321-7788\" } ], \"servicesNeeded\": [ \"walking\", \"sitting\", \"drop_in\" ], \"servicesOffered\": { \"walking\": { \"enabled\": true, \"rate\": \"25\" }, \"sitting\": { \"enabled\": true, \"rate\": \"65\" }, \"boarding\": { \"enabled\": true, \"rate\": \"70\" }, \"drop_in\": { \"enabled\": true, \"rate\": \"22\" } }, \"caregiverExperience\": { \"yearsExperience\": \"3\", \"skills\": [] }, \"homeEnvironment\": { \"housingType\": \"Single Family Home\", \"yardType\": \"Fully Fenced Yard (6ft)\" }, \"idUploaded\": true, \"idFileName\": \"sarah_id_verification_front.jpg\", \"smsNotifications\": true, \"emailNotifications\": true, \"agreeTerms\": true, \"agreeWelfare\": true, \"agreeBackgroundCheck\": true }, \"token\": \"jwt_mock_token_2wgdl4nbqc4\", \"message\": \"Welcome to PawTrust! Your registration was completed successfully.\" }"
+  - button "+ Register Another New User":
+    - generic: + Register Another New User
+- contentinfo:
+  - paragraph: © 2026 PawTrust Inc. Built with love for animals and neighborhood trust. | Frontend Registration Demonstration

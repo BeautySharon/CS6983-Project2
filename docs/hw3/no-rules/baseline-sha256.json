@@ -1,0 +1,13 @@
+{
+  "index.html": "5ed70273ebbc8d561042b4c9a393c671db8f72eb8b0d46ea3f30c124634771bf",
+  "server.js": "4e738f3502ac75a93ebda3d4e1967488c048d091bb9d5b61d11d69574ec9ac86",
+  "README.md": "b42c75e619a88398dbd288d4159e0865cb9660374bbdbabe7835589bbf664ce6",
+  "package.json": "aa5f3112fbd15f9c7b4ebc76d362b999fe6ff3f5e066df32f4d73f66a7dca197",
+  "test/validation.test.js": "ea40bfba80785535a0981e2ecd1eb2407dd5ad71a34e6a4575b64bbe73db54d5",
+  "css/styles.css": "782cb3d9ff9bc555d90c1833f8e8c0b91aa50890ddfb3ca017045b42fef0e33d",
+  "js/confetti.js": "149feb906f71922161834151db1565947b2a6cb014ec4f6a3d8591eec1a2f662",
+  "js/validation.js": "8dbf1240d91e3be73b734f076f65d55cf27db471fe23b15eb7ee0115bd656a7c",
+  "js/data.js": "0ec35be1598563c6525f81f8dd6c80b24664b508df45968d45e982161f4ef710",
+  "js/mockApi.js": "ef31a71e736fa35d3daa6a2791ba7a92287fba7e4881cb3b5ec0580b161b747b",
+  "js/app.js": "7bc09cbab83963f85d766fe2e53477088fc69e8676071a01fe0e32976743cfed"
+}
