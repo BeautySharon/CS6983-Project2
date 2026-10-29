@@ -10,7 +10,8 @@
 
 Follow these steps for every task, in order, and report on each in your final message:
 
-1. **Read the GitHub Issue** and its acceptance criteria. No issue number → ask for one.
+1. **Read the GitHub Issue** and its acceptance criteria. No issue number → stop and ask for one; never guess.
+   The branch name and commit messages must use that exact issue number.
 2. **Read the linked user story** in `docs/PRD.md` and the business rules (BR-x) it touches.
 3. **Open the mockup** for the page (`docs/mockups/`, mapping in PRD §6) before writing UI.
 4. **Follow the architecture** below: route → controller → DAO; pages fetch via `apiFetch`, components get props.
@@ -107,6 +108,9 @@ pawtrust-frontend/src/
 - Status codes: 400 bad input or invalid state transition, 401 missing/invalid/expired token or bad credentials,
   403 wrong role or not the owner, 404 not found, 409 conflict (duplicate or concurrent change), 500 server error.
 - Never return `passwordHash` to the client.
+- The UI shows success only after the server returns 2xx. A network error or non-2xx response always shows an
+  error message — no "demo" or fake success paths, even when the backend is not running yet.
+- Version numbers in config files (e.g. the React version in `eslint.config.js`) match the installed packages.
 - Run `npm run lint` in `pawtrust-frontend` before committing; no unused imports.
 - User-facing text is in **English**. Code comments in English.
 
@@ -274,6 +278,8 @@ pawtrust-frontend/src/
 - ❌ Don't mix auth mechanisms: JWT only, no server sessions or cookies.
 - ❌ Don't return `passwordHash` or store plain passwords.
 - ❌ Don't rewrite unrelated files or reformat whole files.
+- ❌ Don't build pages or features the task didn't ask for. If a link needs a page that doesn't exist yet,
+  add only the route with a placeholder.
 
 ### Security
 
