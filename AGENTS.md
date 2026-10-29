@@ -307,3 +307,12 @@ cd pawtrust-frontend && npm install && npm run dev
   (e.g. `owner1@example.com`). Never hardcode credentials in source code or docs, and never reuse them
   in production or shared environments.
 - Dev data (`pawtrust_dev`) and test data (`pawtrust_test`) live in separate databases; tests may wipe only `pawtrust_test`.
+
+## 6. Deployment
+
+- Frontend → **Vercel** (Vite build, `VITE_API_BASE_URL` = deployed backend URL).
+- Backend → **Render** web service (`npm start`). Env vars set in the Render dashboard only:
+  `PawTrust_DB_URI`, `PawTrust_db=pawtrust_prod`, `JWT_SECRET`, `CORS_ORIGIN` (the Vercel URL).
+- `pawtrust_prod` is used only by the deployed backend — never by tests, seeds or local dev.
+- CORS allows only `CORS_ORIGIN` (and `localhost` in development). Add new env vars to `.env.example`.
+- `main` auto-deploys after CI passes; keep the live URLs in README.

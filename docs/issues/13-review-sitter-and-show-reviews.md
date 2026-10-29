@@ -16,6 +16,7 @@ Full-stack review creation and display (merged from former #14, US-12).
 - [ ] Task gets `reviewed: true`
 - [ ] `ReviewModal` with accessible star rating (keyboard selectable) opened from a "Review" button on eligible tasks
 - [ ] `GET /pawtrust/reviews/sitter/:sitterId` and `GET /pawtrust/reviews/task/:taskId`
+- [ ] `GET /pawtrust/tasks/finished` returns the logged-in sitter's `finished` tasks (from `req.user`), so unreviewed ones can show "No review yet"
 - [ ] Sitter Dashboard "Finished & Reviews" column: stars + comment per task, or "No review yet"; average rating at top
 - [ ] Stars have an `aria-label` like "4 of 5 stars"
 - [ ] Supertest + RTL tests

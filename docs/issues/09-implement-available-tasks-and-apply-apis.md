@@ -11,8 +11,8 @@ Backend for sitters finding and applying to work.
 
 ## Acceptance criteria
 - [ ] `GET /pawtrust/tasks/available` returns only `open` tasks
-- [ ] `ApplicationsDAO` + `POST /pawtrust/applications/apply` `{ taskId, sitterId, message }` creates `pending` application
+- [ ] `ApplicationsDAO` + `POST /pawtrust/applications/apply` `{ taskId, message }` creates `pending` application; `sitterId` comes from `req.user.id` (sitter role only)
 - [ ] Message ≤ 300 chars; duplicate application → 409; applying to non-open task → 400
-- [ ] `GET /pawtrust/applications/sitter/:sitterId` lists a sitter's applications
+- [ ] `GET /pawtrust/applications/mine` lists the logged-in sitter's applications (id from `req.user`, not from the URL)
 - [ ] Supertest for all of the above
 - [ ] Code follows AGENTS.md; PR links this issue with `Closes #<n>` and is approved by teammate

@@ -10,6 +10,7 @@ Full-stack: sitter completes a job.
 **Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria
+- [ ] `GET /pawtrust/tasks/accepted` returns tasks where `acceptedSitterId` = `req.user.id` and status `assigned` (sitter role only)
 - [ ] `AcceptedTasks` column lists tasks where this sitter is accepted and status ≠ finished
 - [ ] `POST /pawtrust/tasks/:taskId/finish` sets status `finished`; only accepted sitter (403 otherwise); already finished → 409 and the button is disabled after the first click (BR-5)
 - [ ] Finished task leaves the Accepted column without page reload

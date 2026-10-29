@@ -166,11 +166,19 @@ When implementing a UI story, match layout, colors and component states to the m
 - **Accessibility:** labeled inputs, keyboard navigation, visible focus, AA contrast.
 - **Quality:** automated tests for every API endpoint; CI runs lint + tests on each PR.
 - **Performance:** dashboard loads in < 2 s on a typical connection.
+- **Deployment:** the app is publicly reachable over HTTPS (see §8 Deployment); secrets live only in the hosting platform's env settings.
 
 ## 8. Tech Stack
 
 React 19 + Vite + Tailwind CSS · Node.js + Express · MongoDB Atlas (native driver, DAO pattern) ·
-Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken. Runs locally (no cloud deployment in P2).
+Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken.
+
+**Deployment (required for P2):**
+- Frontend: Vercel (static Vite build); `VITE_API_BASE_URL` points to the deployed backend.
+- Backend: Render web service (Node); env vars `PawTrust_DB_URI`, `PawTrust_db=pawtrust_prod`, `JWT_SECRET`, `CORS_ORIGIN` set in the Render dashboard, never in git.
+- Database: MongoDB Atlas; production uses its own database (`pawtrust_prod`), separate from dev and test.
+- CORS allows only the deployed frontend origin (plus `localhost` in development).
+- `main` auto-deploys after CI passes; the deployed URLs are listed in README.
 
 ### Technical Notes — Data Model
 
@@ -203,11 +211,11 @@ Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken. Runs locall
 | Sprint | Dates | Goal | Stories |
 |---|---|---|---|
 | Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 + chores #1, #2 |
-| Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews | US-7 – US-12 |
-| Future | — | Descoped for P2 | US-6, US-13, cloud deployment |
+| Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews + production deployment | US-7 – US-12 + deployment chore |
+| Future | — | Descoped for P2 | US-6, US-13 |
 
 ## 10. Success Metrics
 
-- All P0 stories demoed end-to-end on the local development environment.
+- All P0 stories demoed end-to-end on the deployed production URL.
 - ≥ 70% test coverage on backend controllers/DAOs.
 - 0 open `priority:high` bugs at the end of Sprint 2.
