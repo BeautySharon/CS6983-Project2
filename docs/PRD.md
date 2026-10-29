@@ -74,12 +74,6 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 - [ ] Delete asks for confirmation; finished tasks cannot be deleted
 - [ ] Only the task's owner can delete it (server returns 403 otherwise)
 
-**US-6 (P1) Edit a task**
-> As an owner, I want to edit an open task so that I can fix mistakes.
-- [ ] Edit opens a modal pre-filled with the task's values
-- [ ] Only `open` tasks can be edited; same validation as US-4
-- [ ] List updates without a page reload
-
 ### Epic C — Sitter: Find & Apply
 
 **US-7 (P0) Browse available tasks**
@@ -120,14 +114,6 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 > As a sitter, I want to see my completed tasks and their reviews so I can track my reputation.
 - [ ] "Finished & Reviews" section lists finished tasks with stars + comment, or "No review yet"
 - [ ] Average rating is shown at the top
-
-### Epic F — Scheduling
-
-**US-13 (P2) Calendar view**
-> As an owner, I want to see my tasks on a calendar and create a task by clicking a date.
-- [ ] Week/month calendar (FullCalendar) shows my tasks by date
-- [ ] Clicking an empty slot opens Post Task with the date pre-filled
-- [ ] Clicking a task opens its edit modal
 
 ## 5. Core User Flow
 
@@ -212,8 +198,6 @@ Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken.
 |---|---|---|---|
 | Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 + chores #1, #2 |
 | Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews + production deployment | US-7 – US-12 + deployment chore |
-| Future | — | Descoped for P2 | US-6, US-13 |
-
 ## 10. Success Metrics
 
 - All P0 stories demoed end-to-end on the deployed production URL.

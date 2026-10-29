@@ -174,7 +174,7 @@ pawtrust-frontend/src/
 
 ## 2. PRD & Design References
 
-- **PRD:** [`docs/PRD.md`](docs/PRD.md) — user stories US-1…US-13 with acceptance criteria.
+- **PRD:** [`docs/PRD.md`](docs/PRD.md) — user stories US-1…US-12 with acceptance criteria.
   Each GitHub Issue references its user story; read the story before implementing.
 - **Mockups:** `docs/mockups/` (`login.png`, `ownerdashboard.png`, `sitterdashboard.png`)
 - **User guide:** https://docs.google.com/document/d/1Iss2T72vSEq4-krnOlWMqNabvPXAXoBrTseXnCKdLxE/edit
