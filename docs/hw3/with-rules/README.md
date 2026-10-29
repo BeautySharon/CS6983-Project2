@@ -2,7 +2,7 @@
 
 This directory preserves the registration frontend generated **with** the team rules in place, and its evaluation.
 It is experiment evidence, not the production implementation for issue #6.
-The matching without-rules run is in [`../no-rules/`](../no-rules/); the comparison is in [`../comparison.md`](../comparison.md).
+The matching without-rules run is in [`../no-rules/`](https://github.com/BeautySharon/CS6983-Project2/tree/docs/6-hw3-no-rules-evidence/docs/hw3/no-rules); the comparison is in [`../comparison.md`](../comparison.md).
 
 - [Test results, prompt, setup and limitations](test-results.md)
 - [Unmodified original output](with-rules-v1.zip) — includes the AI's own git history (`.git`); `node_modules/` and `dist/` excluded

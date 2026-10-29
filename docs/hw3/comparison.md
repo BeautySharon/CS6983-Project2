@@ -1,7 +1,7 @@
 # HW3: Rules vs. No Rules — Registration Page
 
 Feature: user registration page (issue #6, US-1). Same tool and model (Antigravity IDE, Gemini 3.8 Flash High),
-fresh conversation each time, same base prompt. Evidence: [`no-rules/`](no-rules/) (#16) and [`with-rules/`](with-rules/).
+fresh conversation each time, same base prompt. Evidence: [`no-rules/`](https://github.com/BeautySharon/CS6983-Project2/tree/docs/6-hw3-no-rules-evidence/docs/hw3/no-rules) (#16) and [`with-rules/`](with-rules/).
 
 ## Summary
 
