@@ -194,10 +194,11 @@ Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken.
 
 ## 9. Release Plan
 
-| Sprint | Dates | Goal | Stories |
-|---|---|---|---|
-| Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 + chores #1, #2 |
-| Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews + production deployment | US-7 – US-12 + deployment chore |
+| Sprint | Dates | Goal | Stories | Issues |
+|---|---|---|---|---|
+| Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 | #1–#8, #14 |
+| Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews + production deployment | US-7 – US-12 | #9–#13, #17 |
+
 ## 10. Success Metrics
 
 - All P0 stories demoed end-to-end on the deployed production URL.
