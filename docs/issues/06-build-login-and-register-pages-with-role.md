@@ -5,6 +5,7 @@ owner: B
 ---
 ## Context
 Frontend for authentication, matching `docs/mockups/pawtrust-mockup.png` (Login + Register).
+**The Register page is the feature used for the with/without-rules comparison (assignment Task 3) — see `docs/hw3/`.**
 
 **User story:** US-1, US-2  
 **Owner:** Member B (`Gingobell`)

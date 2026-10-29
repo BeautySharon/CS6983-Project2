@@ -4,7 +4,7 @@ milestone: Sprint 1
 owner: A
 ---
 ## Context
-Backend for owners managing their tasks. **This is the feature used for the with/without-rules comparison (assignment Task 3).**
+Backend for owners managing their tasks.
 
 **User story:** US-3, US-4  
 **Owner:** Member A (`BeautySharon`)
