@@ -1,13 +1,13 @@
 title: Show sitter's accepted tasks and allow marking finished
 labels: feature,priority:high
 milestone: Sprint 2
-owner: A
+owner: B
 ---
 ## Context
 Full-stack: sitter completes a job.
 
 **User story:** US-10  
-**Owner:** Member A (`BeautySharon`)
+**Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria
 - [ ] `GET /pawtrust/tasks/accepted` returns tasks where `acceptedSitterId` = `req.user.id` and status `assigned` (sitter role only)

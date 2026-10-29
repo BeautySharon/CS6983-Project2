@@ -1,13 +1,13 @@
 title: Allow owner to review a sitter and show reviews to the sitter
 labels: feature,priority:medium
 milestone: Sprint 2
-owner: B
+owner: A
 ---
 ## Context
 Full-stack review creation and display (merged from former #14, US-12).
 
 **User story:** US-11, US-12  
-**Owner:** Member B (`Gingobell`)
+**Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria
 - [ ] `ReviewsDAO` + `POST /pawtrust/reviews` `{ taskId, rating, comment }`
