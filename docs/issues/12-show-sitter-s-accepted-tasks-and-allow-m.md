@@ -6,7 +6,7 @@ owner: B
 ## Context
 Full-stack: sitter completes a job.
 
-**User story:** US-10  
+**User story:** US-8  
 **Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria

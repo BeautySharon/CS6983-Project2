@@ -6,7 +6,7 @@ owner: A
 ## Context
 Backend for sitters finding and applying to work.
 
-**User story:** US-7, US-8  
+**User story:** US-5, US-6  
 **Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria

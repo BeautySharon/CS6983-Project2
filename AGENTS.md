@@ -174,7 +174,7 @@ pawtrust-frontend/src/
 
 ## 2. PRD & Design References
 
-- **PRD:** [`docs/PRD.md`](docs/PRD.md) — user stories US-1…US-12 with acceptance criteria.
+- **PRD:** [`docs/PRD.md`](docs/PRD.md) — user stories US-1…US-10 with acceptance criteria.
   Each GitHub Issue references its user story; read the story before implementing.
 - **Mockups:** `docs/mockups/` (`login.png`, `ownerdashboard.png`, `sitterdashboard.png`)
 - **User guide:** https://docs.google.com/document/d/1Iss2T72vSEq4-krnOlWMqNabvPXAXoBrTseXnCKdLxE/edit
@@ -208,7 +208,7 @@ pawtrust-frontend/src/
 3. **Sitter applies** → application `pending`; owner sees it under the task.
 4. **Owner accepts one sitter** → that application `accepted`, others `rejected`, task `assigned`.
 5. **Sitter marks finished** → task `finished`, removed from sitter's Accepted list.
-6. **(Sprint 2, US-11/12) Owner reviews sitter** → rating 1–5 + comment, only for `finished` tasks with an accepted sitter, once per task; sitter sees reviews on their dashboard.
+6. **(Sprint 2, US-9/10) Owner reviews sitter** → rating 1–5 + comment, only for `finished` tasks with an accepted sitter, once per task; sitter sees reviews on their dashboard.
 
 ---
 

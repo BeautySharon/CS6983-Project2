@@ -6,7 +6,7 @@ owner: B
 ## Context
 Owner UI, matching `docs/mockups/ownerdashboard.png`.
 
-**User story:** US-4, US-5  
+**User story:** US-3, US-4  
 **Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria

@@ -6,7 +6,7 @@ owner: A
 ## Context
 Backend for owners managing their tasks. **This is the feature used for the with/without-rules comparison (assignment Task 3).**
 
-**User story:** US-4, US-5  
+**User story:** US-3, US-4  
 **Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria

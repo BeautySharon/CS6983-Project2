@@ -4,9 +4,9 @@ milestone: Sprint 2
 owner: A
 ---
 ## Context
-Full-stack review creation and display (merged from former #14, US-12).
+Full-stack review creation and display (covers both the owner and sitter side).
 
-**User story:** US-11, US-12  
+**User story:** US-9, US-10  
 **Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria

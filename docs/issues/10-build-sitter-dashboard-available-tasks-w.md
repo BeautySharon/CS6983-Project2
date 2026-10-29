@@ -6,7 +6,7 @@ owner: B
 ## Context
 Sitter UI, matching `docs/mockups/sitterdashboard.png`.
 
-**User story:** US-7, US-8  
+**User story:** US-5, US-6  
 **Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria

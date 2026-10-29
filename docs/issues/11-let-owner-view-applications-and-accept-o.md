@@ -6,7 +6,7 @@ owner: B
 ## Context
 Full-stack: owner picks exactly one sitter per task.
 
-**User story:** US-9  
+**User story:** US-7  
 **Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria

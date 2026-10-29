@@ -57,17 +57,15 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 - [ ] On success, Owner → `/owner`, Sitter → `/sitter`; session (token) persists across page refresh
 - [ ] Logout clears the token and returns to `/`; visiting a dashboard while logged out redirects to `/`
 
-> US-3 (separate token story) was merged into US-2 so that authentication is designed once, in Sprint 1.
-
 ### Epic B — Owner: Task Management
 
-**US-4 (P0) Post a task**
+**US-3 (P0) Post a task**
 > As an owner, I want to post a pet-care task so that sitters can apply.
 - [ ] Fields: pet type, description, date & time, duration (hours), location
 - [ ] All fields required; date must be in the future; duration > 0
 - [ ] New task appears at the top of "My Tasks" with status `open`
 
-**US-5 (P0) View and delete my tasks**
+**US-4 (P0) View and delete my tasks**
 > As an owner, I want to see and manage my tasks so that I stay organized.
 - [ ] "My Tasks" lists only my tasks, newest first, paginated (3 per page)
 - [ ] Each task shows pet type, date, duration, location, status, number of applications
@@ -76,13 +74,13 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 
 ### Epic C — Sitter: Find & Apply
 
-**US-7 (P0) Browse available tasks**
+**US-5 (P0) Browse available tasks**
 > As a sitter, I want to browse open tasks so that I can find work.
 - [ ] Shows only tasks with status `open`, paginated
 - [ ] Each card shows pet type, description, date, duration, location
 - [ ] Empty state: "No open tasks right now"
 
-**US-8 (P0) Apply to a task**
+**US-6 (P0) Apply to a task**
 > As a sitter, I want to apply with an optional message so the owner knows why I'm a good fit.
 - [ ] Optional message (≤ 300 chars) + Apply button
 - [ ] After applying, the button becomes a disabled "Applied" label
@@ -90,13 +88,13 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 
 ### Epic D — Matching & Completion
 
-**US-9 (P0) Accept one sitter**
+**US-7 (P0) Accept one sitter**
 > As an owner, I want to review applicants and accept one so that my task is covered.
 - [ ] Under each task, list applications with sitter name and message
 - [ ] Accept sets that application `accepted`, all others `rejected`, task `assigned`
 - [ ] After acceptance, other applicants show "Not selected" and cannot be accepted
 
-**US-10 (P0) Track and finish accepted tasks**
+**US-8 (P0) Track and finish accepted tasks**
 > As a sitter, I want to see tasks I was accepted for and mark them finished.
 - [ ] "Accepted Tasks" lists tasks where I am the accepted sitter and status ≠ `finished`
 - [ ] "Mark finished" sets task status to `finished`
@@ -104,13 +102,13 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 
 ### Epic E — Reviews & Reputation
 
-**US-11 (P1) Review a sitter**
+**US-9 (P1) Review a sitter**
 > As an owner, I want to rate and review the sitter after a task so others can trust them.
 - [ ] "Review" button appears only on `finished` tasks that are not yet reviewed
 - [ ] Modal: 1–5 star rating (required) + comment (optional, ≤ 500 chars)
 - [ ] One review per task; task is marked `reviewed`
 
-**US-12 (P1) See my reviews**
+**US-10 (P1) See my reviews**
 > As a sitter, I want to see my completed tasks and their reviews so I can track my reputation.
 - [ ] "Finished & Reviews" section lists finished tasks with stars + comment, or "No review yet"
 - [ ] Average rating is shown at the top
@@ -133,8 +131,8 @@ Task status lifecycle: `open` → `assigned` → `finished` (→ `reviewed: true
 | Page | Mockup | Related stories |
 |---|---|---|
 | Login / Register | `docs/mockups/login.png` | US-1, US-2 |
-| Owner Dashboard | `docs/mockups/ownerdashboard.png` | US-4, US-5, US-9, US-11 |
-| Sitter Dashboard | `docs/mockups/sitterdashboard.png` | US-7, US-8, US-10, US-12 |
+| Owner Dashboard | `docs/mockups/ownerdashboard.png` | US-3, US-4, US-7, US-9 |
+| Sitter Dashboard | `docs/mockups/sitterdashboard.png` | US-5, US-6, US-8, US-10 |
 
 When implementing a UI story, match layout, colors and component states to the mockup listed here.
 
@@ -196,8 +194,8 @@ Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken.
 
 | Sprint | Dates | Goal | Stories | Issues |
 |---|---|---|---|---|
-| Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 | #1–#8, #14 |
-| Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews + production deployment | US-7 – US-12 | #9–#13, #17 |
+| Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-3, US-4 | #1–#8, #14 |
+| Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews + production deployment | US-5 – US-10 | #9–#13, #17 |
 
 ## 10. Success Metrics
 
