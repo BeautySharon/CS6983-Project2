@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | **Product** | PawTrust — trusted pet-sitting marketplace |
-| **Team** | Member A (`@member-a`), Member B (`@member-b`) <!-- TODO: replace with GitHub usernames --> |
+| **Team** | Member A — `BeautySharon` (backend-focused) · Member B — `Gingobell` (frontend-focused) |
 | **Version** | v1.0 (P2) |
-| **Timeline** | Sprint 1: Oct 27 – Nov 9, 2026 · Sprint 2: Nov 10 – Nov 23, 2026 <!-- TODO: adjust to course timeline --> |
+| **Timeline** | Sprint 1: Oct 27 – Nov 4, 2026 · Sprint 2: Nov 5 – Nov 12, 2026 · **Project due: Nov 12, 2026** |
 | **Mockups** | `docs/mockups/` — see §6 for page ↔ story mapping <!-- TODO: add Claude Artifact / Figma link --> |
 
 ---
@@ -57,38 +57,30 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 - [ ] On success, Owner → `/owner`, Sitter → `/sitter`; session (token) persists across page refresh
 - [ ] Logout clears the token and returns to `/`; visiting a dashboard while logged out redirects to `/`
 
-> US-3 (separate token story) was merged into US-2 so that authentication is designed once, in Sprint 1.
-
 ### Epic B — Owner: Task Management
 
-**US-4 (P0) Post a task**
+**US-3 (P0) Post a task**
 > As an owner, I want to post a pet-care task so that sitters can apply.
 - [ ] Fields: pet type, description, date & time, duration (hours), location
 - [ ] All fields required; date must be in the future; duration > 0
 - [ ] New task appears at the top of "My Tasks" with status `open`
 
-**US-5 (P0) View and delete my tasks**
+**US-4 (P0) View and delete my tasks**
 > As an owner, I want to see and manage my tasks so that I stay organized.
 - [ ] "My Tasks" lists only my tasks, newest first, paginated (3 per page)
 - [ ] Each task shows pet type, date, duration, location, status, number of applications
 - [ ] Delete asks for confirmation; finished tasks cannot be deleted
 - [ ] Only the task's owner can delete it (server returns 403 otherwise)
 
-**US-6 (P1) Edit a task**
-> As an owner, I want to edit an open task so that I can fix mistakes.
-- [ ] Edit opens a modal pre-filled with the task's values
-- [ ] Only `open` tasks can be edited; same validation as US-4
-- [ ] List updates without a page reload
-
 ### Epic C — Sitter: Find & Apply
 
-**US-7 (P0) Browse available tasks**
+**US-5 (P0) Browse available tasks**
 > As a sitter, I want to browse open tasks so that I can find work.
 - [ ] Shows only tasks with status `open`, paginated
 - [ ] Each card shows pet type, description, date, duration, location
 - [ ] Empty state: "No open tasks right now"
 
-**US-8 (P0) Apply to a task**
+**US-6 (P0) Apply to a task**
 > As a sitter, I want to apply with an optional message so the owner knows why I'm a good fit.
 - [ ] Optional message (≤ 300 chars) + Apply button
 - [ ] After applying, the button becomes a disabled "Applied" label
@@ -96,13 +88,13 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 
 ### Epic D — Matching & Completion
 
-**US-9 (P0) Accept one sitter**
+**US-7 (P0) Accept one sitter**
 > As an owner, I want to review applicants and accept one so that my task is covered.
 - [ ] Under each task, list applications with sitter name and message
 - [ ] Accept sets that application `accepted`, all others `rejected`, task `assigned`
 - [ ] After acceptance, other applicants show "Not selected" and cannot be accepted
 
-**US-10 (P0) Track and finish accepted tasks**
+**US-8 (P0) Track and finish accepted tasks**
 > As a sitter, I want to see tasks I was accepted for and mark them finished.
 - [ ] "Accepted Tasks" lists tasks where I am the accepted sitter and status ≠ `finished`
 - [ ] "Mark finished" sets task status to `finished`
@@ -110,24 +102,16 @@ Priority: **P0** = must have (Sprint 1 core) · **P1** = should have · **P2** =
 
 ### Epic E — Reviews & Reputation
 
-**US-11 (P1) Review a sitter**
+**US-9 (P1) Review a sitter**
 > As an owner, I want to rate and review the sitter after a task so others can trust them.
 - [ ] "Review" button appears only on `finished` tasks that are not yet reviewed
 - [ ] Modal: 1–5 star rating (required) + comment (optional, ≤ 500 chars)
 - [ ] One review per task; task is marked `reviewed`
 
-**US-12 (P1) See my reviews**
+**US-10 (P1) See my reviews**
 > As a sitter, I want to see my completed tasks and their reviews so I can track my reputation.
 - [ ] "Finished & Reviews" section lists finished tasks with stars + comment, or "No review yet"
 - [ ] Average rating is shown at the top
-
-### Epic F — Scheduling
-
-**US-13 (P2) Calendar view**
-> As an owner, I want to see my tasks on a calendar and create a task by clicking a date.
-- [ ] Week/month calendar (FullCalendar) shows my tasks by date
-- [ ] Clicking an empty slot opens Post Task with the date pre-filled
-- [ ] Clicking a task opens its edit modal
 
 ## 5. Core User Flow
 
@@ -144,21 +128,28 @@ Task status lifecycle: `open` → `assigned` → `finished` (→ `reviewed: true
 
 ## 6. Mockup / Design Summary
 
-| Page | Mockup | Related stories |
+All pages are in one image: `docs/mockups/pawtrust-mockup.png`.
+
+| Page | Position in mockup | Related stories |
 |---|---|---|
-| Login / Register | `docs/mockups/login.png` | US-1, US-2 |
-| Owner Dashboard | `docs/mockups/ownerdashboard.png` | US-4, US-5, US-9, US-11 |
-| Sitter Dashboard | `docs/mockups/sitterdashboard.png` | US-7, US-8, US-10, US-12 |
+| Login | top-left | US-2 |
+| Register | top-center | US-1 |
+| Owner Dashboard | top-right (collapsed) and bottom-left (applications expanded) | US-3, US-4, US-7, US-9 |
+| Sitter Dashboard | bottom-right | US-5, US-6, US-8, US-10 |
 
 When implementing a UI story, match layout, colors and component states to the mockup listed here.
 
-- **Login page:** centered card on indigo→sky gradient, email + password, link to register.
-- **Owner dashboard:** left column "Post a new task" form card; right column "My Tasks"
-  list with per-task applications and Accept buttons; pagination at bottom.
-- **Sitter dashboard:** three columns — Available Tasks (apply), Accepted Tasks
-  (mark finished), Finished & Reviews (stars + comment).
-- Visual language: rounded-2xl white cards, indigo primary buttons, rose destructive
-  buttons, emerald "accepted/finished" pills. Single column on mobile.
+- **Header (dashboards):** PawTrust logo left; "Welcome, Owner/Sitter" + **Logout** button right. No sidebar.
+- **Login / Register:** centered white card; register picks role with Pet Owner / Pet Sitter radio buttons; bio optional.
+- **Owner dashboard:** left "Post a New Task" form; right "My Tasks" (task count, 3 per page, Prev / Page x / y / Next).
+  Each task shows status pill; **Delete** only on `open`; collapsible "Applications (n)" with applicant name,
+  applied date, message and **Accept**; after accept: "Accepted" / "Not selected" pills and "Accepted: &lt;sitter&gt;";
+  `finished` + not reviewed → **Review** button, reviewed → "Reviewed".
+- **Sitter dashboard:** three columns — Available Tasks (optional message + **Apply**; applied → disabled "Applied"),
+  Accepted Tasks (**Mark as Finished**), Finished Tasks & Reviews (average rating at top, stars + comment per task).
+- Visual language: rounded white cards, indigo primary buttons, rose destructive buttons; status pills
+  Open = sky/blue, Assigned = amber, Finished/Accepted = emerald, Not selected = slate. Single column on mobile.
+  Pet illustrations are optional (an emoji or initial avatar is fine).
 
 ## 7. Non-functional Requirements
 
@@ -166,11 +157,19 @@ When implementing a UI story, match layout, colors and component states to the m
 - **Accessibility:** labeled inputs, keyboard navigation, visible focus, AA contrast.
 - **Quality:** automated tests for every API endpoint; CI runs lint + tests on each PR.
 - **Performance:** dashboard loads in < 2 s on a typical connection.
+- **Deployment:** the app is publicly reachable over HTTPS (see §8 Deployment); secrets live only in the hosting platform's env settings.
 
 ## 8. Tech Stack
 
 React 19 + Vite + Tailwind CSS · Node.js + Express · MongoDB Atlas (native driver, DAO pattern) ·
-Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken. Runs locally (no cloud deployment in P2).
+Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken.
+
+**Deployment (required for P2):**
+- Frontend: Vercel (static Vite build); `VITE_API_BASE_URL` points to the deployed backend.
+- Backend: Render web service (Node); env vars `PawTrust_DB_URI`, `PawTrust_db=pawtrust_prod`, `JWT_SECRET`, `CORS_ORIGIN` set in the Render dashboard, never in git.
+- Database: MongoDB Atlas; production uses its own database (`pawtrust_prod`), separate from dev and test.
+- CORS allows only the deployed frontend origin (plus `localhost` in development).
+- `main` auto-deploys after CI passes; the deployed URLs are listed in README.
 
 ### Technical Notes — Data Model
 
@@ -193,21 +192,20 @@ Mocha/Chai/Supertest + Vitest/RTL · GitHub Actions · jsonwebtoken. Runs locall
 | BR-1 | Task status only moves forward: `open` → `assigned` → `finished`. | 400 |
 | BR-2 | Owner can edit or delete a task only while it is `open`. `assigned` and `finished` tasks are locked. | 400 |
 | BR-3 | Sitters can apply only to `open` tasks, once per task, and never to their own account's tasks. | 400 / 409 |
-| BR-4 | Accept is atomic: the task update uses a conditional `{ _id, status: "open" }` filter, so if two accepts race only the first succeeds. | 409 for the loser |
+| BR-4 | Accept is atomic: the task update uses a conditional `{ _id, status: "open" }` filter inside a transaction that also updates the applications, so if two accepts race only the first succeeds and application statuses always match the assigned sitter. | 409 for the loser |
 | BR-5 | Only the accepted sitter can mark a task finished. Marking an already-finished task again is a no-op that returns 409 (the button is disabled after the first click). | 403 / 409 |
 | BR-6 | Only the task's owner can review, only when the task is `finished`, once per task. | 403 / 400 / 409 |
 | BR-7 | Role is enforced on the server: owner-only and sitter-only endpoints reject the other role. | 403 |
 
 ## 9. Release Plan
 
-| Sprint | Dates | Goal | Stories |
-|---|---|---|---|
-| Sprint 1 | Oct 27 – Nov 9 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-4, US-5 + chores #1, #2 |
-| Sprint 2 | Nov 10 – Nov 23 | Full matching loop + reviews | US-7 – US-12 |
-| Future | — | Descoped for P2 | US-6, US-13, cloud deployment |
+| Sprint | Dates | Goal | Stories | Issues |
+|---|---|---|---|---|
+| Sprint 1 | Oct 27 – Nov 4 | Foundation (project setup, DB + indexes, auth middleware, tests, CI) + accounts + owner task management | US-1, US-2, US-3, US-4 | #1–#8, #14 |
+| Sprint 2 | Nov 5 – Nov 12 | Full matching loop + reviews + production deployment | US-5 – US-10 | #9–#13, #17 |
 
 ## 10. Success Metrics
 
-- All P0 stories demoed end-to-end on the local development environment.
+- All P0 stories demoed end-to-end on the deployed production URL.
 - ≥ 70% test coverage on backend controllers/DAOs.
 - 0 open `priority:high` bugs at the end of Sprint 2.

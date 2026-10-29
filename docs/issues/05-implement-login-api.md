@@ -7,7 +7,7 @@ owner: A
 `POST /pawtrust/login` authenticates a user and issues a JWT; `requireAuth` protects later endpoints.
 
 **User story:** US-2  
-**Owner:** Member A
+**Owner:** Member A (`BeautySharon`)
 
 ## Acceptance criteria
 - [ ] Returns `{ token, user }` — JWT signed with `JWT_SECRET` from env, 1-day expiry; user without `passwordHash`

@@ -4,10 +4,10 @@ milestone: Sprint 1
 owner: B
 ---
 ## Context
-Owner UI, matching `docs/mockups/ownerdashboard.png`.
+Owner UI, matching `docs/mockups/pawtrust-mockup.png` (Owner Dashboard).
 
-**User story:** US-4, US-5  
-**Owner:** Member B
+**User story:** US-3, US-4  
+**Owner:** Member B (`Gingobell`)
 
 ## Acceptance criteria
 - [ ] Two-column layout on desktop (form left, list right), single column on mobile
