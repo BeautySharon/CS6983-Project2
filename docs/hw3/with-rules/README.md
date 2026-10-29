@@ -7,6 +7,7 @@ The matching without-rules run is in [`../no-rules/`](../no-rules/); the compari
 - [Test results, prompt, setup and limitations](test-results.md)
 - [Unmodified original output](with-rules-v1.zip) — includes the AI's own git history (`.git`); `node_modules/` and `dist/` excluded
 - [Original source SHA-256 hashes](baseline-sha256.txt)
+- Screenshots: [empty form](empty-form.png), [invalid input](invalid-inputs.png), [success → login](login-redirect.png)
 
 ## Setup
 

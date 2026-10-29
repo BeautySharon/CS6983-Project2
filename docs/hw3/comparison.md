@@ -33,4 +33,5 @@ fresh conversation each time, same base prompt. Evidence: [`no-rules/`](no-rules
 ## Limitations
 
 One run per condition, so model randomness is not controlled. The with-rules prompt has one extra line pointing to the
-rules, and the with-rules folder contained the docs that line refers to. Browser screenshots exist only for the no-rules run.
+rules, and the with-rules folder contained the docs that line refers to. The with-rules version has no simulated 409/500 switch, so those error states are covered by its unit
+tests rather than screenshots.

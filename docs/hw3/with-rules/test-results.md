@@ -46,7 +46,19 @@ Generated tests (Vitest + React Testing Library):
 4. **Small scope addition.** A styled `LoginPage` was added so the "Login here" link works; its submit does nothing.
 5. **Minor config issue.** `eslint.config.js` declares React version `18.3` although React 19 is installed.
 
+## Browser checks
+
+Run with `npm run dev`, no backend running, fictional data only.
+
+| Scenario | Observed result | Evidence |
+|---|---|---|
+| Empty form | Card matches the mockup: Name, Email, Password (hint "Must be at least 8 characters"), Pet Owner / Pet Sitter, Location, Bio (optional), "Login here" link | [empty-form.png](empty-form.png) |
+| Password shorter than 8 | Browser blocks submit: "Please lengthen this text to 8 characters or more" | [invalid-inputs.png](invalid-inputs.png) |
+| Valid submit | Redirected to Login with "Registration successful! Please log in." — although no backend was running (finding 2) | [login-redirect.png](login-redirect.png) |
+
+The empty-form password field shows browser autofill dots, not generated content.
+
 ## Not covered
 
-Browser screenshots, real backend responses (400/409/500 from a server), keyboard/screen-reader walkthrough,
+Real backend responses (400/409/500 from a server), keyboard/screen-reader walkthrough,
 and mobile viewport were not checked in this run.
