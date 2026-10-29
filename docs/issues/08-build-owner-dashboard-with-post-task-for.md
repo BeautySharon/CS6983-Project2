@@ -4,7 +4,7 @@ milestone: Sprint 1
 owner: B
 ---
 ## Context
-Owner UI, matching `docs/mockups/ownerdashboard.png`.
+Owner UI, matching `docs/mockups/pawtrust-mockup.png` (Owner Dashboard).
 
 **User story:** US-3, US-4  
 **Owner:** Member B (`Gingobell`)

@@ -4,7 +4,7 @@ milestone: Sprint 2
 owner: B
 ---
 ## Context
-Sitter UI, matching `docs/mockups/sitterdashboard.png`.
+Sitter UI, matching `docs/mockups/pawtrust-mockup.png` (Sitter Dashboard).
 
 **User story:** US-5, US-6  
 **Owner:** Member B (`Gingobell`)

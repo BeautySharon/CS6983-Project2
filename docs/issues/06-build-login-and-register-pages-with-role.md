@@ -4,7 +4,7 @@ milestone: Sprint 1
 owner: B
 ---
 ## Context
-Frontend for authentication, matching `docs/mockups/login.png`.
+Frontend for authentication, matching `docs/mockups/pawtrust-mockup.png` (Login + Register).
 
 **User story:** US-1, US-2  
 **Owner:** Member B (`Gingobell`)

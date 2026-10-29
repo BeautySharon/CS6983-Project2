@@ -128,21 +128,28 @@ Task status lifecycle: `open` → `assigned` → `finished` (→ `reviewed: true
 
 ## 6. Mockup / Design Summary
 
-| Page | Mockup | Related stories |
+All pages are in one image: `docs/mockups/pawtrust-mockup.png`.
+
+| Page | Position in mockup | Related stories |
 |---|---|---|
-| Login / Register | `docs/mockups/login.png` | US-1, US-2 |
-| Owner Dashboard | `docs/mockups/ownerdashboard.png` | US-3, US-4, US-7, US-9 |
-| Sitter Dashboard | `docs/mockups/sitterdashboard.png` | US-5, US-6, US-8, US-10 |
+| Login | top-left | US-2 |
+| Register | top-center | US-1 |
+| Owner Dashboard | top-right (collapsed) and bottom-left (applications expanded) | US-3, US-4, US-7, US-9 |
+| Sitter Dashboard | bottom-right | US-5, US-6, US-8, US-10 |
 
 When implementing a UI story, match layout, colors and component states to the mockup listed here.
 
-- **Login page:** centered card on indigo→sky gradient, email + password, link to register.
-- **Owner dashboard:** left column "Post a new task" form card; right column "My Tasks"
-  list with per-task applications and Accept buttons; pagination at bottom.
-- **Sitter dashboard:** three columns — Available Tasks (apply), Accepted Tasks
-  (mark finished), Finished & Reviews (stars + comment).
-- Visual language: rounded-2xl white cards, indigo primary buttons, rose destructive
-  buttons, emerald "accepted/finished" pills. Single column on mobile.
+- **Header (dashboards):** PawTrust logo left; "Welcome, Owner/Sitter" + **Logout** button right. No sidebar.
+- **Login / Register:** centered white card; register picks role with Pet Owner / Pet Sitter radio buttons; bio optional.
+- **Owner dashboard:** left "Post a New Task" form; right "My Tasks" (task count, 3 per page, Prev / Page x / y / Next).
+  Each task shows status pill; **Delete** only on `open`; collapsible "Applications (n)" with applicant name,
+  applied date, message and **Accept**; after accept: "Accepted" / "Not selected" pills and "Accepted: &lt;sitter&gt;";
+  `finished` + not reviewed → **Review** button, reviewed → "Reviewed".
+- **Sitter dashboard:** three columns — Available Tasks (optional message + **Apply**; applied → disabled "Applied"),
+  Accepted Tasks (**Mark as Finished**), Finished Tasks & Reviews (average rating at top, stars + comment per task).
+- Visual language: rounded white cards, indigo primary buttons, rose destructive buttons; status pills
+  Open = sky/blue, Assigned = amber, Finished/Accepted = emerald, Not selected = slate. Single column on mobile.
+  Pet illustrations are optional (an emoji or initial avatar is fine).
 
 ## 7. Non-functional Requirements
 

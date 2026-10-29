@@ -176,7 +176,8 @@ pawtrust-frontend/src/
 
 - **PRD:** [`docs/PRD.md`](docs/PRD.md) — user stories US-1…US-10 with acceptance criteria.
   Each GitHub Issue references its user story; read the story before implementing.
-- **Mockups:** `docs/mockups/` (`login.png`, `ownerdashboard.png`, `sitterdashboard.png`)
+- **Mockup:** `docs/mockups/pawtrust-mockup.png` — one image with all four pages (Login, Register,
+  Owner Dashboard, Sitter Dashboard); PRD §6 says where each page is and which states it shows.
 - **User guide:** https://docs.google.com/document/d/1Iss2T72vSEq4-krnOlWMqNabvPXAXoBrTseXnCKdLxE/edit
 
 ### Visual design (match the mockups)
@@ -185,7 +186,8 @@ pawtrust-frontend/src/
 - Cards: `rounded-2xl bg-white ring-1 ring-slate-200` (or `bg-white/80 shadow-xl ring-black/5`), padding `p-4`/`p-6`.
 - Primary button: `rounded-md bg-indigo-600 text-white px-3 py-1 hover:bg-indigo-700`.
 - Destructive button: `ring-1 ring-rose-300 text-rose-700 hover:bg-rose-50`.
-- Status pills: `text-xs px-2 py-1 rounded-full ring-1` — emerald for accepted/finished, slate for neutral.
+- Status pills: `text-xs px-2 py-1 rounded-full ring-1` — sky for `open`, amber for `assigned`,
+  emerald for `finished` / "Accepted", slate for "Not selected" / neutral. Always include the text label.
 - Desktop: 12-column grid (`grid grid-cols-1 lg:grid-cols-12 gap-6`); must collapse to one column on mobile.
 - Pagination is **client-side**: list endpoints return the full list for the current user, and the
   page component slices it (Owner "My Tasks": 3 per page) with Prev / "Page x / y" / Next.
