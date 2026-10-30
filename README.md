@@ -1,34 +1,22 @@
-# PawTrust
+# CS6983-Project2
 
-A MERN web app connecting pet owners with pet sitters. See [`docs/PRD.md`](docs/PRD.md) and [`AGENTS.md`](AGENTS.md).
+## Authentication frontend — Issue #6
 
-## Local development
-
-Requirements: Node.js 20+, a MongoDB connection string (Atlas, or a local `mongod` for quick checks).
-
-### Backend (`pawtrust-backend`)
-
-```bash
-cd pawtrust-backend
-cp .env.example .env      # fill in PawTrust_DB_URI and JWT_SECRET
-npm install
-npm run seed              # dummy owner/sitter accounts in pawtrust_dev
-npm start                 # http://localhost:8000/pawtrust/health → {"status":"ok"}
-npm test                  # runs against PawTrust_db=pawtrust_test
-```
-
-Unique indexes (`users.email`, `applications(taskId, sitterId)`, `reviews.taskId`) are created on startup.
-
-### Frontend (`pawtrust-frontend`)
-
-```bash
+```sh
 cd pawtrust-frontend
-cp .env.example .env      # VITE_API_BASE_URL=http://localhost:<backend PORT>
-npm install
-npm run dev               # http://localhost:5173
-npm run lint
+npm ci
+cp .env.example .env.local
+npm run dev
 ```
 
-## Deployment
+Open the URL printed by Vite. Set `VITE_API_BASE_URL` to the backend origin (without `/pawtrust`). The sample uses port 8000. Backend registration/login and the database must be supplied by issues #4/#5; unavailable services display an error. Owner and sitter routes currently contain protected placeholders for issues #8/#10.
 
-Live URLs will be added here once deployed (#17).
+```sh
+npm test
+npm run lint
+npm run build
+```
+
+Verified with Node 25.6.1 / npm 11.9.0. The test runner disables Node's experimental Web Storage in both the parent and worker processes so jsdom supplies browser storage. Shared runtime selection remains part of #1.
+
+See [auth handoff and verification](docs/issue-6-auth-handoff.md) for API contracts, TDD evidence and remaining integration work.

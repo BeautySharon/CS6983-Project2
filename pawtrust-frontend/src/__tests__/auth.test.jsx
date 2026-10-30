@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
@@ -64,6 +64,44 @@ describe('authentication pages', () => {
     fetch.mockReturnValue(new Promise(() => {})); const ui = open(); await credentials(ui);
     await ui.dblClick(screen.getByRole('button', { name: 'Login' }));
     expect(fetch).toHaveBeenCalledTimes(1); expect(screen.getByRole('button', { name: 'Logging in…' })).toBeDisabled();
+  });
+  it('restores a session and redirects an incorrect role route', () => {
+    localStorage.setItem('pawtrust.token', 'token'); localStorage.setItem('pawtrust.user', JSON.stringify(user));
+    open('/sitter'); expect(screen.getByRole('heading', { name: 'Owner Dashboard' })).toBeInTheDocument();
+  });
+  it('redirects to login when a protected request receives 401', async () => {
+    localStorage.setItem('pawtrust.token', 'expired'); localStorage.setItem('pawtrust.user', JSON.stringify(user));
+    open('/owner'); reply({ error: 'Unauthorized' }, 401);
+    await act(async () => { await expect(apiFetch('/tasks')).rejects.toThrow('Unauthorized'); });
+    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
+  });
+  it('rejects malformed successful login responses', async () => {
+    reply({ token: 'token', user: { ...user, userType: 'admin' } }); const ui = open(); await credentials(ui);
+    await ui.click(screen.getByRole('button', { name: 'Login' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('invalid login response'); expect(localStorage.length).toBe(0);
+  });
+  it('validates registration email and password length', async () => {
+    const ui = open('/register'); await ui.type(screen.getByLabelText('Name'), 'Taylor');
+    await ui.type(screen.getByLabelText('Location'), 'Boston'); await ui.type(screen.getByLabelText('Email'), 'invalid');
+    await ui.type(screen.getByLabelText('Password', { exact: true }), 'short');
+    await ui.click(screen.getByRole('button', { name: 'Create Account' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('valid email');
+    await ui.clear(screen.getByLabelText('Email')); await ui.type(screen.getByLabelText('Email'), 'taylor@example.com');
+    await ui.click(screen.getByRole('button', { name: 'Create Account' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('at least 8'); expect(fetch).not.toHaveBeenCalled();
+  });
+  it('retains registration values after duplicate email rejection', async () => {
+    reply({ error: 'Email already registered' }, 409); const ui = open('/register');
+    await ui.type(screen.getByLabelText('Name'), 'Taylor'); await credentials(ui); await ui.type(screen.getByLabelText('Location'), 'Boston');
+    await ui.click(screen.getByRole('button', { name: 'Create Account' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Email already registered');
+    expect(screen.getByLabelText('Name')).toHaveValue('Taylor'); expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+  it('toggles password visibility without submitting', async () => {
+    const ui = open(); await ui.click(screen.getByRole('button', { name: 'Show password' }));
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveAttribute('type', 'text');
+    await ui.click(screen.getByRole('button', { name: 'Hide password' }));
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveAttribute('type', 'password'); expect(fetch).not.toHaveBeenCalled();
   });
 });
 
