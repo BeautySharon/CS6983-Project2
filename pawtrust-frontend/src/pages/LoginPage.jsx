@@ -12,10 +12,10 @@ export default function LoginPage() {
     const user = saveSession(result);
     navigate(`/${user.userType}`, { replace: true });
   }
-  return <AuthLayout><h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
-    <p className="mt-2 text-sm text-slate-600">Log in to your PawTrust account.</p>
+  return <AuthLayout><h1 className="text-2xl font-semibold text-slate-900">Login</h1>
+    <p className="mt-2 text-sm text-slate-600">Welcome back! Please sign in to continue.</p>
     {location.state?.registered && <p role="status" className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Account created. Log in to get started.</p>}
     <AuthForm onSubmit={handleLogin} />
-    <p className="mt-6 text-center text-sm text-slate-600">New to PawTrust? <Link to="/register" className={linkClass}>Register here</Link></p>
+    <p className="mt-4 text-center text-sm text-slate-600">Don't have an account? <Link to="/register" className={linkClass}>Register here</Link></p>
   </AuthLayout>;
 }

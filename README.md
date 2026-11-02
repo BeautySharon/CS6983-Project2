@@ -1,5 +1,9 @@
 # CS6983-Project2
 
+## Design
+
+Read [Design.md](Design.md) before implementing frontend pages. It defines shared styles and links the current mockup and visual references.
+
 ## Authentication frontend — Issue #6
 
 ```sh

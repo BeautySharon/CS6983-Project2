@@ -2,9 +2,10 @@
 
 ## Scope and design
 
-Implements US-1 and US-2 against the current PRD and Issue #6. Visual reference: `docs/mockups/pawtrust-mockup.png` and the prior course repository's LoginPage/RegisterPage (`BeautySharon/CS5610_Final_Project`). Retains its indigo buttons, pale gradient background, rounded white cards and labeled forms. Authentication behavior is newly implemented against this repository's JWT contract; old local identity storage is not reused.
+Implements US-1 and US-2 against the current PRD and Issue #6. Shared visual rules are defined in [`Design.md`](../Design.md), with page composition from `docs/mockups/pawtrust-mockup.png`. Authentication uses the current JWT contract.
 
-Main had no application scaffold at `7fc3ef7`. The minimal frontend package, build/test/lint configuration and Tailwind entry are included to make this issue runnable independently. No backend or database scaffold is introduced. The Tailwind entry contains directives only, not a separate custom stylesheet design.
+The frontend package and build/test/lint configuration make these pages runnable. No backend or database implementation is included. The Tailwind entry contains directives only. `Design.md` and its AGENTS.md entry establish shared styling for this issue and later dashboard work.
+
 
 ## TDD evidence
 
@@ -46,3 +47,7 @@ The course's backend integration tests, full user-flow E2E tests, shared CI/depl
 ## Dependency purposes
 
 React, React DOM and Router implement pages/navigation; Vite and its React plugin provide build/dev tooling; Tailwind, PostCSS and Autoprefixer implement the existing design. Vitest, jsdom and Testing Library exercise user behavior; ESLint and React/hooks plugins check source. Vitest 4.1.12 replaces initially evaluated v3 because the dependency audit reported vulnerabilities; installation audit reports zero vulnerabilities. Exact resolved versions are recorded in the lockfile.
+
+## Design alignment
+
+Authentication pages follow Design.md: slate wordmark with indigo paw, translucent rounded card, rounded-xl controls, shared focus styles, mockup headings and field order, User Type radios, and example placeholders. Password Show/Hide follows the reference implementation.

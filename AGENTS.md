@@ -13,7 +13,7 @@ Follow these steps for every task, in order, and report on each in your final me
 1. **Read the GitHub Issue** and its acceptance criteria. No issue number → stop and ask for one; never guess.
    The branch name and commit messages must use that exact issue number.
 2. **Read the linked user story** in `docs/PRD.md` and the business rules (BR-x) it touches.
-3. **Open the mockup** for the page (`docs/mockups/`, mapping in PRD §6) before writing UI.
+3. **Read `Design.md` and open the mockup** for the page (`docs/mockups/`, mapping in PRD §6) before writing UI. `Design.md` defines shared frontend styles; the PRD and target issue define feature scope.
 4. **Follow the architecture** below: route → controller → DAO; pages fetch via `apiFetch`, components get props.
 5. **Change only files in the issue's scope.** List any file you had to touch outside it and why.
 6. **Write tests** per the Testing strategy (400 / 401 / 403 / 409 cases where applicable).
@@ -178,6 +178,8 @@ pawtrust-frontend/src/
 
 ## 2. PRD & Design References
 
+- **Design specification:** [`Design.md`](Design.md) — shared palette, typography, spacing, controls, responsive layouts and interaction states for all frontend issues. Update it when a shared design pattern changes.
+
 - **PRD:** [`docs/PRD.md`](docs/PRD.md) — user stories US-1…US-10 with acceptance criteria.
   Each GitHub Issue references its user story; read the story before implementing.
 - **Mockup:** `docs/mockups/pawtrust-mockup.png` — one image with all four pages (Login, Register,
@@ -185,6 +187,8 @@ pawtrust-frontend/src/
 - **User guide:** https://docs.google.com/document/d/1Iss2T72vSEq4-krnOlWMqNabvPXAXoBrTseXnCKdLxE/edit
 
 ### Visual design (match the mockups)
+
+Use `Design.md` for the complete design specification, including authentication-specific control sizes. The compact primary-button recipe below applies to dashboard actions.
 
 - Page background: `bg-gradient-to-br from-indigo-50 via-white to-sky-50`.
 - Cards: `rounded-2xl bg-white ring-1 ring-slate-200` (or `bg-white/80 shadow-xl ring-black/5`), padding `p-4`/`p-6`.
