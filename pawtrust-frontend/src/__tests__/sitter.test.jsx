@@ -86,3 +86,21 @@ it('redirects an expired sitter session to login', async () => {
   await act(async () => { render(<MemoryRouter initialEntries={['/sitter']}><App /></MemoryRouter>); });
   expect(await screen.findByRole('button', { name: 'Login', exact: true })).toBeInTheDocument(); expect(localStorage.length).toBe(0);
 });
+it('reconciles an already-applied conflict from server history', async () => {
+  let conflict = false;
+  fetch.mockImplementation(async (url, options) => {
+    if (options.method === 'POST') { conflict = true; return reply({ error: 'Already applied' }, 409); }
+    return reply(url.endsWith('/applications/mine') ? (conflict ? [{ taskId: 'task-0' }] : []) : tasks.slice(0, 1));
+  });
+  const ui = dashboard(); await screen.findByText('Walk 0'); await ui.click(screen.getByRole('button', { name: 'Apply', exact: true }));
+  expect(await screen.findByRole('button', { name: 'Applied', exact: true })).toBeDisabled();
+});
+it('accepts a message at the 300-character boundary', async () => {
+  const onApply = vi.fn().mockResolvedValue(undefined); const ui = userEvent.setup(); render(<AvailableTasks tasks={tasks.slice(0, 1)} appliedIds={[]} onApply={onApply} />);
+  fireEvent.change(screen.getByLabelText('Message (optional)'), { target: { value: 'x'.repeat(300) } });
+  await ui.click(screen.getByRole('button', { name: 'Apply', exact: true })); expect(onApply).toHaveBeenCalledWith('task-0', 'x'.repeat(300));
+});
+it('rejects malformed application history instead of allowing duplicate applications', async () => {
+  fetch.mockImplementation(async url => reply(url.endsWith('/applications/mine') ? [{ sitterId: 'wrong-shape' }] : tasks));
+  dashboard(); expect(await screen.findByRole('alert')).toHaveTextContent('unreadable'); expect(screen.queryByRole('button', { name: 'Apply', exact: true })).not.toBeInTheDocument();
+});
