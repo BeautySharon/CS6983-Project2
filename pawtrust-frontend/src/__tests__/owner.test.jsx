@@ -83,3 +83,24 @@ it('shows a load error and retries without fake tasks', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent('Unable to connect'); expect(screen.queryByRole('article')).not.toBeInTheDocument();
   await ui.click(screen.getByRole('button', { name: 'Retry' })); expect(await screen.findByText('No tasks yet. Post your first task.')).toBeInTheDocument();
 });
+it('deletes through the API and refetches the owner list', async () => {
+  fetch.mockResolvedValueOnce(reply([tasks[0]])).mockResolvedValueOnce(reply(null, 204)).mockResolvedValueOnce(reply([]));
+  const ui = userEvent.setup(); render(<OwnerDashboard user={{ name: 'Taylor' }} onLogout={vi.fn()} />);
+  await ui.click(await screen.findByRole('button', { name: 'Delete' })); await ui.click(screen.getByRole('button', { name: 'Confirm delete' }));
+  expect(await screen.findByText('No tasks yet. Post your first task.')).toBeInTheDocument();
+  expect(fetch.mock.calls[1][0]).toMatch(/\/tasks\/task-0$/); expect(fetch.mock.calls[1][1].method).toBe('DELETE');
+});
+it.each([400, 403, 409])('shows a %s create error without clearing fields or reporting success', async (status) => {
+  fetch.mockResolvedValueOnce(reply([])).mockResolvedValueOnce(reply({ error: 'Task rejected' }, status));
+  const ui = userEvent.setup(); render(<OwnerDashboard user={{ name: 'Taylor' }} onLogout={vi.fn()} />);
+  await screen.findByText('No tasks yet. Post your first task.'); await fill(ui); await ui.click(screen.getByRole('button', { name: 'Post Task' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Task rejected'); expect(screen.getByLabelText('Description')).toHaveValue('Walk the dog');
+  expect(screen.queryByText('Task posted.')).not.toBeInTheDocument(); expect(fetch).toHaveBeenCalledTimes(2);
+});
+it('rejects malformed task responses and does not invent application counts', async () => {
+  fetch.mockResolvedValueOnce(reply({ tasks }));
+  const view = render(<OwnerDashboard user={{ name: 'Taylor' }} onLogout={vi.fn()} />);
+  expect(await screen.findByRole('alert')).toHaveTextContent('unreadable task list'); view.unmount();
+  render(<TaskList tasks={[{ ...tasks[0], applicationCount: undefined }]} onDelete={vi.fn()} />);
+  expect(screen.getByText('Application count unavailable')).toBeInTheDocument();
+});
