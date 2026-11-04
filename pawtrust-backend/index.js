@@ -6,7 +6,7 @@ import UsersDAO from "./dao/usersDAO.js";
 
 dotenv.config();
 
-const REQUIRED_ENV = ["PawTrust_DB_URI", "PawTrust_db"];
+const REQUIRED_ENV = ["PawTrust_DB_URI", "PawTrust_db", "JWT_SECRET"];
 
 async function main() {
   const missing = REQUIRED_ENV.filter((name) => !process.env[name]);

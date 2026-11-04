@@ -7,6 +7,8 @@ import UsersDAO from "../dao/usersDAO.js";
 dotenv.config();
 // Tests only ever touch pawtrust_test, whatever .env says.
 process.env.PawTrust_db = "pawtrust_test";
+// Tests sign their own tokens; fall back to a throwaway secret if .env has none (e.g. CI).
+process.env.JWT_SECRET ||= "test-only-jwt-secret";
 
 export let testDb;
 let client;
