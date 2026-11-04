@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PostTaskForm from '../components/PostTaskForm';
 import TaskList from '../components/TaskList';
@@ -25,7 +26,7 @@ export default function OwnerDashboard({ user, onLogout }) {
   return <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-sky-50 text-slate-900">
     <header className="border-b border-slate-200 bg-white/80 px-4 py-4 sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-        <a href="/owner" className="inline-flex items-center gap-2 rounded-md text-3xl font-bold tracking-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"><svg aria-hidden="true" viewBox="0 0 40 40" className="h-9 w-9 fill-current text-indigo-600"><ellipse cx="10" cy="14" rx="4" ry="6" transform="rotate(-25 10 14)"/><ellipse cx="19" cy="9" rx="4" ry="6"/><ellipse cx="29" cy="13" rx="4" ry="6" transform="rotate(25 29 13)"/><path d="M10 29c0-5 6-12 10-12s12 8 12 13c0 8-8 4-12 4s-10 3-10-5Z"/></svg>PawTrust</a>
+        <Link to="/owner" className="inline-flex items-center gap-2 rounded-md text-3xl font-bold tracking-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"><svg aria-hidden="true" viewBox="0 0 40 40" className="h-9 w-9 fill-current text-indigo-600"><ellipse cx="10" cy="14" rx="4" ry="6" transform="rotate(-25 10 14)"/><ellipse cx="19" cy="9" rx="4" ry="6"/><ellipse cx="29" cy="13" rx="4" ry="6" transform="rotate(25 29 13)"/><path d="M10 29c0-5 6-12 10-12s12 8 12 13c0 8-8 4-12 4s-10 3-10-5Z"/></svg>PawTrust</Link>
         <div className="flex items-center gap-4 text-sm"><span>Welcome, Owner</span><button onClick={onLogout} className="rounded-md bg-white px-3 py-1 text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">Logout</button></div>
       </div>
     </header>

@@ -13,7 +13,7 @@ Implements US-3 and US-4 using `Design.md`, the owner mockup and BR-2. The page 
 
 ## API integration
 
-Paths follow issue #7. The response shape below is the frontend expectation to confirm during backend integration:
+Paths follow issue #7. The list response format was confirmed in the #21 review; verify it against the live API during backend integration:
 
 | Request | Expected result |
 | --- | --- |
@@ -21,7 +21,7 @@ Paths follow issue #7. The response shape below is the frontend expectation to c
 | `POST /pawtrust/tasks` | Any JSON 2xx response (or 204); then refetch the list. Body: `petType`, `description`, `date`, numeric `duration`, `location`. |
 | `DELETE /pawtrust/tasks/:id` | Any JSON 2xx response (or 204); then refetch the list. |
 
-Task fields: `_id`, `petType`, `description`, `date`, `duration`, `location`, `status`, `createdAt`, and nonnegative integer `applicationCount`. The count field is not specified in #7 and needs backend confirmation; missing counts display “Application count unavailable” rather than an invented zero. Pet type options are Dog, Cat, Bird and Other; confirm these values with the backend.
+Task fields: `_id`, `petType`, `description`, `date`, `duration`, `location`, `status`, `createdAt`, and nonnegative integer `applicationCount`. The #21 review confirms that #7 will return a plain array including applicationCount; missing counts display “Application count unavailable” rather than an invented zero. Pet type options are Dog, Cat, Bird and Other; confirm these values with the backend.
 
 Requests use the shared Bearer-token client; no owner identity is sent in the body. Server ownership enforcement, persistence and live API integration require #7. A 401 uses the existing session-clearing and login redirect behavior.
 
@@ -55,4 +55,11 @@ Screenshots use test fixtures, not production accounts or persisted records.
 
 ## Branch dependency
 
-`feature/8-owner-dashboard` starts from `feature/6-auth-pages` at `b846ad0` (PR #20). Review the #8 changes against that branch while #20 remains unmerged. After #20 is merged, align this branch with main and verify that the PR diff contains only #8 changes before merging.
+Rebased onto the updated authentication foundation at 284ae8a (PR #20), which includes the merged #23 scaffold and Node 22.23.4 configuration. Review against feature/6-auth-pages until #20 merges, then align with main. Preserve both dashboard routes when combining #8 and #10.
+
+## Review follow-up
+
+The PawTrust logo uses React Router Link for navigation without a full-page reload. Component tests render dashboards inside a router. No new dependencies or backend changes.
+
+Integration validation: Node 22.23.4 / npm 10.9.9; clean npm ci, 34 frontend tests, lint and production build passed. Existing screenshots show the unchanged layout; backend integration remains pending.
+The request-path assertion resolves relative URLs against the test browser origin so it works without a local environment file.
