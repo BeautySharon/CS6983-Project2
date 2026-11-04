@@ -4,7 +4,7 @@
 
 Implements US-1 and US-2 against the current PRD and Issue #6. Shared visual rules are defined in [`Design.md`](../Design.md), with page composition from `docs/mockups/pawtrust-mockup.png`. Authentication uses the current JWT contract.
 
-The frontend package and build/test/lint configuration make these pages runnable. No backend or database implementation is included. The Tailwind entry contains directives only. `Design.md` and its AGENTS.md entry establish shared styling for this issue and later dashboard work.
+The frontend extends the shared scaffold from #23, retaining its backend, environment examples and frontend tooling. Vitest and Testing Library add authentication behavior tests. No backend or database implementation is included. The Tailwind entry contains directives only. `Design.md` and its AGENTS.md entry establish shared styling for this issue and later dashboard work.
 
 
 ## TDD evidence
@@ -46,8 +46,18 @@ The course's backend integration tests, full user-flow E2E tests, shared CI/depl
 
 ## Dependency purposes
 
-React, React DOM and Router implement pages/navigation; Vite and its React plugin provide build/dev tooling; Tailwind, PostCSS and Autoprefixer implement the existing design. Vitest, jsdom and Testing Library exercise user behavior; ESLint and React/hooks plugins check source. Vitest 4.1.12 replaces initially evaluated v3 because the dependency audit reported vulnerabilities; installation audit reports zero vulnerabilities. Exact resolved versions are recorded in the lockfile.
+React, React DOM and Router implement pages/navigation; Vite and its React plugin provide build/dev tooling; Tailwind, PostCSS and Autoprefixer implement the existing design. Vitest, jsdom and Testing Library exercise user behavior; ESLint and React/hooks plugins check source. Vitest 4.1.12 replaces initially evaluated v3 because the dependency audit reported vulnerabilities; the original standalone installation audit reported zero vulnerabilities; this is not a current audit claim for the shared scaffold. Exact resolved versions are recorded in the lockfile.
 
 ## Design alignment
 
 Authentication pages follow Design.md: slate wordmark with indigo paw, translucent rounded card, rounded-xl controls, shared focus styles, mockup headings and field order, User Type radios, and example placeholders. Password Show/Hide follows the reference implementation.
+
+## Shared scaffold integration
+
+Rebased onto the merged Issue #1 scaffold (93f7212). Backend files are unchanged. Preserved the scaffold dependency ranges, lint rules, environment example, ignore rules, Tailwind/PostCSS configuration and index.css entry. Authentication routes, session handling and behavior tests remain in this PR.
+
+Node 22.23.4 is pinned in the root .nvmrc and required by the frontend package. On this runtime native Web Storage is disabled by default, so npm test uses vitest run without the Node 25 compatibility flag. Historical Red/Green results above remain records of the original implementation.
+
+Additional scope: Design.md defines shared frontend styles; AGENTS.md links it. README documents the shared runtime and authentication test commands.
+
+Validation after integration: Node 22.23.4 / npm 10.9.9; standard npm ci succeeds, 21 frontend tests pass, frontend lint/build pass, and the unchanged backend health suite has 2 passing tests. The combined lockfile was generated with npm 11.9.0 after npm 10 encountered a dependency-resolution error; consuming that lockfile with bundled npm 10.9.9 was verified. Real registration/login API integration remains pending.
