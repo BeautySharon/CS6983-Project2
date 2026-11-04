@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
 import IndexesDAO from "../dao/indexesDAO.js";
 import UsersDAO from "../dao/usersDAO.js";
+import TasksDAO from "../dao/tasksDAO.js";
 
 dotenv.config();
 // Tests only ever touch pawtrust_test, whatever .env says.
@@ -20,6 +21,7 @@ export const mochaHooks = {
     testDb = client.db("pawtrust_test");
     await IndexesDAO.injectDB(client);
     await UsersDAO.injectDB(client);
+    await TasksDAO.injectDB(client);
   },
   async afterAll() {
     await client?.close();
