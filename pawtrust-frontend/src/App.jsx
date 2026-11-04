@@ -1,18 +1,30 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import PlaceholderPage from "./pages/PlaceholderPage.jsx";
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AuthLayout, { buttonClass } from './components/AuthLayout';
+import { clearSession, readSession } from './auth/session';
 
+function ProtectedRoute({ role }) {
+  const user = readSession();
+  const navigate = useNavigate();
+  if (!user) return <Navigate to="/" replace />;
+  if (user.userType !== role) return <Navigate to={`/${user.userType}`} replace />;
+  function handleLogout() { clearSession(); navigate('/', { replace: true }); }
+  // Dashboard features are owned by issues #8 and #10, not this auth issue.
+  return <AuthLayout><h1 className="text-2xl font-bold text-slate-900">{role === 'owner' ? 'Owner Dashboard' : 'Sitter Dashboard'}</h1>
+    <p className="mt-4 text-slate-600">Welcome, {user.name}.</p>
+    <p className="my-4 text-sm text-slate-600">Your dashboard is under construction.</p>
+    <button className={buttonClass} onClick={handleLogout}>Logout</button></AuthLayout>;
+}
 export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* TODO(#6): replace with LoginPage and RegisterPage */}
-        <Route path="/" element={<PlaceholderPage title="Login" />} />
-        <Route path="/register" element={<PlaceholderPage title="Register" />} />
-        {/* TODO(#8): replace with OwnerDashboard; TODO(#10): replace with SitterDashboard */}
-        <Route path="/owner" element={<PlaceholderPage title="Owner Dashboard" />} />
-        <Route path="/sitter" element={<PlaceholderPage title="Sitter Dashboard" />} />
-        <Route path="*" element={<PlaceholderPage title="Page not found" />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  const navigate = useNavigate();
+  useEffect(() => {
+    function handleUnauthorized() { navigate('/', { replace: true }); }
+    window.addEventListener('pawtrust:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('pawtrust:unauthorized', handleUnauthorized);
+  }, [navigate]);
+  return <Routes><Route path="/" element={<LoginPage />} /><Route path="/register" element={<RegisterPage />} />
+    <Route path="/owner" element={<ProtectedRoute role="owner" />} /><Route path="/sitter" element={<ProtectedRoute role="sitter" />} />
+    <Route path="*" element={<Navigate to="/" replace />} /></Routes>;
 }
