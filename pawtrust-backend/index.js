@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import app from "./server.js";
 import IndexesDAO from "./dao/indexesDAO.js";
 import UsersDAO from "./dao/usersDAO.js";
+import TasksDAO from "./dao/tasksDAO.js";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ async function main() {
     await client.connect();
     await IndexesDAO.injectDB(client);
     await UsersDAO.injectDB(client);
+    await TasksDAO.injectDB(client);
 
     app.listen(port, () => {
       console.log(`PawTrust backend listening on port ${port}`);
