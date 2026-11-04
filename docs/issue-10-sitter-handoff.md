@@ -20,7 +20,7 @@ Implements PRD US-5/US-6 and BR-3/BR-7 using Design.md and the sitter mockup. Th
 | GET /pawtrust/applications/mine | Array of applications with string taskId. |
 | POST /pawtrust/applications/apply | Body { taskId, message }; successful JSON response or 204. Refetch both lists afterward. |
 
-The shared client sends the Bearer token. No sitter identity is sent in the request body. Non-2xx responses use { error }; 401 clears the session and returns to login. Response envelopes and serialized ID fields require confirmation against the real backend.
+The shared client sends the Bearer token. No sitter identity is sent in the request body. Non-2xx responses use { error }; 401 clears the session and returns to login. The #22 review confirms plain arrays and taskId in application records. Verify serialized IDs and behavior against the live backend.
 
 ## Validation
 
@@ -48,4 +48,10 @@ The shared client sends the Bearer token. No sitter identity is sent in the requ
 
 ## Branch dependency
 
-feature/10-sitter-dashboard starts from feature/6-auth-pages at b846ad0 (PR #20), because main has no frontend foundation yet. It is independent of the owner-dashboard branch. Review against feature/6-auth-pages until #20 merges; then align with main and reconcile the shared route file before merging. No new dependencies or backend changes.
+Rebased onto the updated authentication foundation at 284ae8a (PR #20), which includes the merged #23 scaffold and Node 22.23.4 configuration. Review against feature/6-auth-pages until #20 merges, then align with main. Preserve both dashboard routes when combining #8 and #10.
+
+## Review follow-up
+
+The PawTrust logo uses React Router Link for navigation without a full-page reload. Component tests render dashboards inside a router. No new dependencies or backend changes.
+
+Integration validation: Node 22.23.4 / npm 10.9.9; clean npm ci, 38 frontend tests, lint and production build passed. Existing screenshots show the unchanged layout; backend integration remains pending.

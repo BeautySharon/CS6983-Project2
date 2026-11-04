@@ -8,7 +8,7 @@ import App from '../App';
 
 const tasks = Array.from({ length: 4 }, (_, i) => ({ _id: `task-${i}`, petType: 'Dog', description: `Walk ${i}`, date: '2099-12-01T18:00:00Z', duration: 1.5, location: 'Boston', status: 'open', createdAt: `2026-10-${20 + i}T12:00:00Z` }));
 const reply = (body, status = 200) => ({ ok: status < 400, status, json: async () => body });
-function dashboard() { render(<SitterDashboard user={{ name: 'Taylor' }} onLogout={vi.fn()} />); return userEvent.setup(); }
+function dashboard() { render(<MemoryRouter initialEntries={['/sitter']}><SitterDashboard user={{ name: 'Taylor' }} onLogout={vi.fn()} /></MemoryRouter>); return userEvent.setup(); }
 function server({ initial = tasks.slice(0, 1), applied = [], status = 201, failRefresh = false } = {}) {
   let submitted = false;
   fetch.mockImplementation(async (url, options) => {
