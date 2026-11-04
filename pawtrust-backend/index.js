@@ -2,6 +2,7 @@ import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 import app from "./server.js";
 import IndexesDAO from "./dao/indexesDAO.js";
+import UsersDAO from "./dao/usersDAO.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ async function main() {
   try {
     await client.connect();
     await IndexesDAO.injectDB(client);
+    await UsersDAO.injectDB(client);
 
     app.listen(port, () => {
       console.log(`PawTrust backend listening on port ${port}`);
