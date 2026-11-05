@@ -4,7 +4,7 @@ A MERN web app connecting pet owners with pet sitters. See [`docs/PRD.md`](docs/
 
 ## Local development
 
-Requirements: Node.js 22.23.4 (pinned in `.nvmrc`; run `nvm install && nvm use` from the repository root), a MongoDB connection string (Atlas, or a local `mongod` for quick checks).
+Requirements: Node.js 22.23.4 (pinned in `.nvmrc`; run `nvm install && nvm use` from the repository root), a MongoDB connection string (Atlas, or a local MongoDB replica set for transaction tests).
 
 ### Backend (`pawtrust-backend`)
 
@@ -62,12 +62,13 @@ pushes to `main`, and manual dispatch. Both jobs read the Node version from
 `.nvmrc` and install from their lockfiles with `npm ci`:
 
 - **Frontend:** ESLint, all component tests, and a production build.
-- **Backend:** all integration tests against a fresh MongoDB 7 service container.
+- **Backend:** all integration tests against a fresh, single-node MongoDB 7 replica set.
 
 CI needs no Atlas credentials or repository secrets. Its test database and
-signing key are disposable. The current service is standalone MongoDB; when
-transaction-based features land, the backend job must use a replica set for
-those tests. CI reports checks; it does not configure branch protection or deploy.
+signing key are disposable. The backend job initializes the replica set and waits
+for a writable primary before running tests, including transaction-based features.
+It prints database logs on failure and removes the container and volumes afterward.
+CI reports checks; it does not configure branch protection or deploy.
 
 ## Deployment
 

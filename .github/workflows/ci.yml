@@ -44,20 +44,10 @@ jobs:
       run:
         working-directory: pawtrust-backend
     env:
-      PawTrust_DB_URI: mongodb://127.0.0.1:27017
+      PawTrust_DB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0&directConnection=true
       PawTrust_db: pawtrust_test
       # Disposable test key; never used outside this isolated CI job.
       JWT_SECRET: ci-only-test-signing-key
-    services:
-      mongodb:
-        image: mongo:7
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --quiet --eval 'quit(db.adminCommand({ping:1}).ok ? 0 : 1)'"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 12
     steps:
       - uses: actions/checkout@v6
         with:
@@ -67,5 +57,32 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: pawtrust-backend/package-lock.json
+      - name: Start MongoDB replica set
+        timeout-minutes: 2
+        run: |
+          docker run --detach --name pawtrust-ci-mongo \
+            --publish 127.0.0.1:27017:27017 \
+            mongo:7 --replSet rs0 --bind_ip_all
+          for attempt in $(seq 1 30); do
+            if docker exec pawtrust-ci-mongo mongosh --quiet --eval 'quit(db.adminCommand({ping: 1}).ok ? 0 : 1)'; then
+              break
+            fi
+            sleep 2
+          done
+          docker exec pawtrust-ci-mongo mongosh --quiet --eval '
+            const result = rs.initiate({_id: "rs0", members: [{_id: 0, host: "localhost:27017"}]});
+            if (!result.ok) throw new Error("Replica set initialization failed");
+            for (let attempt = 0; attempt < 60; attempt++) {
+              if (db.hello().isWritablePrimary) quit(0);
+              sleep(1000);
+            }
+            throw new Error("MongoDB did not become primary");
+          '
       - run: npm ci
       - run: npm test
+      - name: MongoDB logs on failure
+        if: failure()
+        run: docker logs pawtrust-ci-mongo
+      - name: Remove test database container
+        if: always()
+        run: docker rm --force --volumes pawtrust-ci-mongo
