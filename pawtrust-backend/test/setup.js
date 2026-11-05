@@ -4,6 +4,7 @@ import { MongoClient } from "mongodb";
 import IndexesDAO from "../dao/indexesDAO.js";
 import UsersDAO from "../dao/usersDAO.js";
 import TasksDAO from "../dao/tasksDAO.js";
+import ApplicationsDAO from "../dao/applicationsDAO.js";
 
 import OwnerApplicationsDAO from '../dao/ownerApplicationsDAO.js';
 
@@ -25,6 +26,7 @@ export const mochaHooks = {
     await UsersDAO.injectDB(client);
     await TasksDAO.injectDB(client);
     await OwnerApplicationsDAO.injectDB(client);
+    await ApplicationsDAO.injectDB(client);
   },
   async afterAll() {
     await client?.close();
