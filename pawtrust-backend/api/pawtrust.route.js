@@ -3,6 +3,8 @@ import UsersController from "./users.controller.js";
 import TasksController from "./tasks.controller.js";
 import { requireAuth, requireRole } from "./middleware/auth.js";
 
+import OwnerApplicationsController from './ownerApplications.controller.js';
+
 const router = express.Router();
 
 router.get("/health", (req, res) => res.json({ status: "ok" }));
@@ -15,5 +17,8 @@ router.post("/tasks", ...ownerOnly, TasksController.apiPostTask);
 router.get("/tasks/mine", ...ownerOnly, TasksController.apiGetMyTasks);
 router.put("/tasks/:id", ...ownerOnly, TasksController.apiUpdateTask);
 router.delete("/tasks/:id", ...ownerOnly, TasksController.apiDeleteTask);
+
+router.get('/applications/owner', ...ownerOnly, OwnerApplicationsController.apiGetOwnerApplications);
+router.post('/accept', ...ownerOnly, OwnerApplicationsController.apiAccept);
 
 export default router;

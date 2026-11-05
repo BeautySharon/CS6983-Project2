@@ -6,6 +6,8 @@ import { apiFetch } from '../api/client';
 
 export default function OwnerDashboard({ user, onLogout }) {
   const [tasks, setTasks] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [acceptError, setAcceptError] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
@@ -14,15 +16,28 @@ export default function OwnerDashboard({ user, onLogout }) {
     const id = ++request.current;
     setLoading(true); setError('');
     try {
-      const data = await apiFetch('/tasks/mine');
+      const [data, applicants] = await Promise.all([apiFetch('/tasks/mine'), apiFetch('/applications/owner')]);
+      if (!Array.isArray(applicants)) throw new Error('The service returned an unreadable application list. Please try again.');
       if (!Array.isArray(data)) throw new Error('The service returned an unreadable task list. Please try again.');
-      if (id === request.current) setTasks(data);
+      if (id === request.current) { setTasks(data); setApplications(applicants); }
     } catch (failure) { if (id === request.current) setError(failure.message); }
     finally { if (id === request.current) setLoading(false); }
   }, []);
   useEffect(() => { load(); return () => { request.current += 1; }; }, [load]);
   async function created() { setRevision(value => value + 1); await load(); }
   async function remove(id) { await apiFetch(`/tasks/${encodeURIComponent(id)}`, { method: 'DELETE' }); await load(); }
+  async function accept(taskId, applicationId) {
+    setAcceptError('');
+    try {
+      await apiFetch('/accept', { method: 'POST', body: JSON.stringify({ taskId, applicationId }) });
+    } catch (failure) {
+      setAcceptError(failure.message);
+      // Refetch after a conflict or uncertain response; never display local success.
+      await load();
+      return;
+    }
+    await load();
+  }
   return <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-sky-50 text-slate-900">
     <header className="border-b border-slate-200 bg-white/80 px-4 py-4 sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
@@ -37,7 +52,8 @@ export default function OwnerDashboard({ user, onLogout }) {
         <div className="min-w-0 lg:col-span-4"><PostTaskForm onSubmit={fields => apiFetch('/tasks', { method: 'POST', body: JSON.stringify(fields) })} onCreated={created} /></div>
         <section aria-labelledby="my-tasks-heading" aria-busy={loading} className="min-w-0 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 lg:col-span-8">
           <div className="mb-4 flex items-center justify-between gap-3"><h2 id="my-tasks-heading" className="text-lg font-semibold">My Tasks</h2>{!loading && !error && <span className="text-sm text-slate-500">{tasks.length} tasks</span>}</div>
-          {loading ? <p role="status" className="py-8 text-sm text-slate-600">Loading tasks…</p> : error ? <div><p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p><button onClick={load} className="mt-3 rounded-md px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">Retry</button></div> : <TaskList key={revision} tasks={tasks} onDelete={remove} />}
+          {acceptError && <p role="alert" className="mb-3 rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{acceptError}</p>}
+          {loading ? <p role="status" className="py-8 text-sm text-slate-600">Loading tasks…</p> : error ? <div><p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p><button onClick={load} className="mt-3 rounded-md px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">Retry</button></div> : <TaskList key={revision} tasks={tasks} onDelete={remove} applications={applications} onAccept={accept} />}
         </section>
       </div>
     </main>
