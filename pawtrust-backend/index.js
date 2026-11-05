@@ -5,6 +5,7 @@ import IndexesDAO from "./dao/indexesDAO.js";
 import UsersDAO from "./dao/usersDAO.js";
 import TasksDAO from "./dao/tasksDAO.js";
 import ApplicationsDAO from "./dao/applicationsDAO.js";
+import ReviewsDAO from "./dao/reviewsDAO.js";
 
 import OwnerApplicationsDAO from './dao/ownerApplicationsDAO.js';
 
@@ -29,6 +30,7 @@ async function main() {
     await TasksDAO.injectDB(client);
     await OwnerApplicationsDAO.injectDB(client);
     await ApplicationsDAO.injectDB(client);
+    await ReviewsDAO.injectDB(client);
 
     app.listen(port, () => {
       console.log(`PawTrust backend listening on port ${port}`);

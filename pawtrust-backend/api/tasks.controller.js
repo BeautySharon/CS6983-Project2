@@ -90,6 +90,15 @@ export default class TasksController {
     }
   }
 
+  static async apiGetFinishedTasks(req, res) {
+    try {
+      return res.json(await TasksDAO.getFinishedTasksBySitterId(req.user.id));
+    } catch (e) {
+      console.error(`apiGetFinishedTasks failed: ${e}`);
+      return res.status(500).json({ error: "Could not load finished tasks" });
+    }
+  }
+
   static async apiUpdateTask(req, res) {
     if (!isValidTaskId(req.params.id)) return res.status(400).json({ error: "Invalid task id" });
     const { error, fields } = parseTaskFields(req.body ?? {}, { partial: true });

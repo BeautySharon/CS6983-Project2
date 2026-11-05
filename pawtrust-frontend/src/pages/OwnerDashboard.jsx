@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PostTaskForm from '../components/PostTaskForm';
 import TaskList from '../components/TaskList';
+import ReviewModal from '../components/ReviewModal';
 import { apiFetch } from '../api/client';
 
 export default function OwnerDashboard({ user, onLogout }) {
@@ -11,6 +12,8 @@ export default function OwnerDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
+  const [reviewing, setReviewing] = useState(null);
+  const closeReview = useCallback(() => setReviewing(null), []);
   const request = useRef(0);
   const load = useCallback(async () => {
     const id = ++request.current;
@@ -38,6 +41,12 @@ export default function OwnerDashboard({ user, onLogout }) {
     }
     await load();
   }
+  // The modal stays open with an error unless the server returns 2xx.
+  async function submitReview({ rating, comment }) {
+    await apiFetch('/reviews', { method: 'POST', body: JSON.stringify({ taskId: reviewing._id, rating, comment }) });
+    setReviewing(null);
+    await load();
+  }
   return <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-sky-50 text-slate-900">
     <header className="border-b border-slate-200 bg-white/80 px-4 py-4 sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
@@ -53,9 +62,10 @@ export default function OwnerDashboard({ user, onLogout }) {
         <section aria-labelledby="my-tasks-heading" aria-busy={loading} className="min-w-0 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 lg:col-span-8">
           <div className="mb-4 flex items-center justify-between gap-3"><h2 id="my-tasks-heading" className="text-lg font-semibold">My Tasks</h2>{!loading && !error && <span className="text-sm text-slate-500">{tasks.length} tasks</span>}</div>
           {acceptError && <p role="alert" className="mb-3 rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{acceptError}</p>}
-          {loading ? <p role="status" className="py-8 text-sm text-slate-600">Loading tasks…</p> : error ? <div><p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p><button onClick={load} className="mt-3 rounded-md px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">Retry</button></div> : <TaskList key={revision} tasks={tasks} onDelete={remove} applications={applications} onAccept={accept} />}
+          {loading ? <p role="status" className="py-8 text-sm text-slate-600">Loading tasks…</p> : error ? <div><p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p><button onClick={load} className="mt-3 rounded-md px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">Retry</button></div> : <TaskList key={revision} tasks={tasks} onDelete={remove} applications={applications} onAccept={accept} onReview={setReviewing} />}
         </section>
       </div>
     </main>
+    {reviewing && <ReviewModal task={reviewing} onSubmit={submitReview} onClose={closeReview} />}
   </div>;
 }

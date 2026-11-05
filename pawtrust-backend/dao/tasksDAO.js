@@ -78,6 +78,20 @@ export default class TasksDAO {
     return tasks.find({ status: "open" }).sort({ date: 1, _id: 1 }).toArray();
   }
 
+  // US-10: the sitter's finished tasks, most recently updated first, each with
+  // its review (or null) so the dashboard can show "No review yet".
+  static async getFinishedTasksBySitterId(sitterId) {
+    return tasks
+      .aggregate([
+        { $match: { acceptedSitterId: { $eq: TasksDAO.toObjId(sitterId, "sitterId") }, status: "finished" } },
+        { $sort: { updatedAt: -1, _id: -1 } },
+        { $lookup: { from: "reviews", localField: "_id", foreignField: "taskId", as: "reviews" } },
+        { $addFields: { review: { $ifNull: [{ $arrayElemAt: ["$reviews", 0] }, null] } } },
+        { $project: { reviews: 0 } },
+      ])
+      .toArray();
+  }
+
   static async getTaskById(taskId) {
     return tasks.findOne({ _id: { $eq: TasksDAO.toObjId(taskId, "taskId") } });
   }
