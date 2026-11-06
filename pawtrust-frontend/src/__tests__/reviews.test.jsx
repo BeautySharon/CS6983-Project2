@@ -61,22 +61,44 @@ it('keeps the modal open and shows the server error on failure', async () => {
   expect(screen.getByRole('button', { name: 'Submit review' })).toBeEnabled();
 });
 
-it('posts the review from the owner dashboard and refetches to show Reviewed', async () => {
-  localStorage.setItem('pawtrust.token', 'test-token');
-  fetch.mockResolvedValueOnce(reply([finished]))
-    .mockResolvedValueOnce(reply({ _id: 'review-1' }, 201))
-    .mockResolvedValueOnce(reply([{ ...finished, reviewed: true }]));
+// Owner dashboard server: the task list flips to reviewed once a review was attempted.
+function ownerServer(reviewStatus) {
+  let attempted = false;
+  fetch.mockImplementation(async (url, options = {}) => {
+    if (options.method === 'POST') {
+      attempted = true;
+      return reviewStatus < 400 ? reply({ _id: 'review-1' }, reviewStatus) : reply({ error: 'This task has already been reviewed' }, reviewStatus);
+    }
+    if (url.endsWith('/applications/owner')) return reply([]);
+    return reply([{ ...finished, reviewed: attempted }]);
+  });
+}
+async function submitFromDashboard() {
   const ui = userEvent.setup();
   render(<MemoryRouter><OwnerDashboard user={{ name: 'Taylor' }} onLogout={vi.fn()} /></MemoryRouter>);
   await ui.click(await screen.findByRole('button', { name: 'Review' }));
   await ui.click(screen.getByRole('radio', { name: '3 of 5 stars' }));
   await ui.click(screen.getByRole('button', { name: 'Submit review' }));
+}
+
+it('posts the review from the owner dashboard and refetches to show Reviewed', async () => {
+  localStorage.setItem('pawtrust.token', 'test-token');
+  ownerServer(201);
+  await submitFromDashboard();
   expect(await screen.findByText('Reviewed')).toBeInTheDocument();
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  const [url, options] = fetch.mock.calls[1];
+  const [url, options] = fetch.mock.calls.find(([, options]) => options?.method === 'POST');
   expect(url).toMatch(/\/pawtrust\/reviews$/);
   expect(JSON.parse(options.body)).toEqual({ taskId: 'task-1', rating: 3, comment: '' });
   expect(options.headers.get('Authorization')).toBe('Bearer test-token');
+});
+
+it('refetches after a 409 so an already-reviewed task stops offering Review', async () => {
+  ownerServer(409);
+  await submitFromDashboard();
+  expect(await screen.findByRole('alert')).toHaveTextContent('already been reviewed');
+  expect(await screen.findByText('Reviewed')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Review' })).not.toBeInTheDocument();
 });
 
 it('shows stars with an accessible label, the average, and "No review yet"', () => {

@@ -41,9 +41,16 @@ export default function OwnerDashboard({ user, onLogout }) {
     }
     await load();
   }
-  // The modal stays open with an error unless the server returns 2xx.
+  // The modal stays open with an error unless the server returns 2xx. On
+  // failure the list is still refetched, so a task that is already reviewed
+  // (409) shows "Reviewed" instead of a Review button that can only fail.
   async function submitReview({ rating, comment }) {
-    await apiFetch('/reviews', { method: 'POST', body: JSON.stringify({ taskId: reviewing._id, rating, comment }) });
+    try {
+      await apiFetch('/reviews', { method: 'POST', body: JSON.stringify({ taskId: reviewing._id, rating, comment }) });
+    } catch (failure) {
+      load();
+      throw failure;
+    }
     setReviewing(null);
     await load();
   }

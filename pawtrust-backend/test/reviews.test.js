@@ -158,6 +158,44 @@ describe("Reviews API", () => {
       expect(await testDb.collection("reviews").countDocuments()).to.equal(1);
     });
 
+    // Regression for PR #30 review: the review and the task's reviewed flag
+    // must never get out of sync.
+    it("rolls back the review when setting the reviewed flag fails", async () => {
+      const original = mongodb.Collection.prototype.updateOne;
+      mongodb.Collection.prototype.updateOne = async function (...args) {
+        if (this.collectionName === "tasks") throw new Error("Simulated write failure");
+        return original.apply(this, args);
+      };
+      let res;
+      try {
+        res = await postReview(OWNER, { taskId, rating: 4 });
+      } finally {
+        mongodb.Collection.prototype.updateOne = original;
+      }
+      expect(res.status).to.equal(500);
+      expect(await testDb.collection("reviews").countDocuments()).to.equal(0);
+      const task = await testDb.collection("tasks").findOne({ _id: new ObjectId(taskId) });
+      expect(task.reviewed).to.equal(false);
+
+      // The owner can simply retry.
+      expect((await postReview(OWNER, { taskId, rating: 4 })).status).to.equal(201);
+    });
+
+    it("repairs a task left unreviewed when its review already exists", async () => {
+      await testDb.collection("reviews").insertOne({
+        taskId: new ObjectId(taskId),
+        ownerId: new ObjectId(OWNER_ID),
+        sitterId: new ObjectId(SITTER_ID),
+        rating: 5,
+        comment: "",
+        createdAt: new Date(),
+      });
+      const res = await postReview(OWNER, { taskId, rating: 3 });
+      expect(res.status).to.equal(409);
+      const task = await testDb.collection("tasks").findOne({ _id: new ObjectId(taskId) });
+      expect(task.reviewed).to.equal(true);
+    });
+
     itRejectsBadTokens((headers) => postReview(headers, { taskId, rating: 4 }));
   });
 
