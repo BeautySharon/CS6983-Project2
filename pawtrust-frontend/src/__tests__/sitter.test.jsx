@@ -14,7 +14,7 @@ function server({ initial = tasks.slice(0, 1), applied = [], status = 201, failR
   fetch.mockImplementation(async (url, options) => {
     if (options.method === 'POST') { if (status < 400) { submitted = true; applied = [{ taskId: 'task-0' }]; } return reply(status < 400 ? { ok: true } : { error: 'Application rejected' }, status); }
     if (submitted && failRefresh) throw new TypeError('Offline');
-    if (url.endsWith('/tasks/finished')) return reply([]);
+    if (url.endsWith('/tasks/finished') || url.endsWith('/tasks/accepted')) return reply([]);
     return reply(url.endsWith('/applications/mine') ? applied : initial);
   });
 }
@@ -38,8 +38,8 @@ it('submits only taskId and message with Bearer authentication, then refetches',
   const [url, options] = fetch.mock.calls.find(([, options]) => options.method === 'POST');
   expect(url).toMatch(/\/pawtrust\/applications\/apply$/); expect(JSON.parse(options.body)).toEqual({ taskId: 'task-0', message: 'Happy to help' });
   expect(options.headers.get('Authorization')).toBe('Bearer test-token');
-  // 2 initial loads + /tasks/finished, the apply POST, then 2 refetches.
-  expect(fetch).toHaveBeenCalledTimes(6);
+  // Four initial lists, the apply POST, then two refetches.
+  expect(fetch).toHaveBeenCalledTimes(7);
 });
 it('accepts an empty optional message', async () => {
   server(); const ui = dashboard(); await screen.findByText('Walk 0'); await ui.click(screen.getByRole('button', { name: 'Apply', exact: true }));
@@ -93,6 +93,7 @@ it('redirects an expired sitter session to login', async () => {
 it('reconciles an already-applied conflict from server history', async () => {
   let conflict = false;
   fetch.mockImplementation(async (url, options) => {
+    if (url.endsWith('/tasks/accepted') || url.endsWith('/tasks/finished')) return reply([]);
     if (options.method === 'POST') { conflict = true; return reply({ error: 'Already applied' }, 409); }
     return reply(url.endsWith('/applications/mine') ? (conflict ? [{ taskId: 'task-0' }] : []) : tasks.slice(0, 1));
   });

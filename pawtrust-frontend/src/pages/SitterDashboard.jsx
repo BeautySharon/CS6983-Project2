@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import AcceptedTasks from '../components/AcceptedTasks';
 import AvailableTasks from '../components/AvailableTasks';
 import FinishedReviews from '../components/FinishedReviews';
 import { apiFetch } from '../api/client';
@@ -37,6 +38,27 @@ export default function SitterDashboard({ user, onLogout }) {
     } catch (failure) { setFinished({ loading: false, error: failure.message, tasks: [] }); }
   }, []);
   useEffect(() => { loadFinished(); }, [loadFinished]);
+  const [finishError, setFinishError] = useState('');
+  const [accepted, setAccepted] = useState({ loading: true, error: '', tasks: [] });
+  const loadAccepted = useCallback(async () => {
+    setAccepted(state => ({ ...state, loading: true, error: '' }));
+    try {
+      const data = await apiFetch('/tasks/accepted');
+      if (!Array.isArray(data)) throw new Error('The service returned an unreadable accepted-task list. Please try again.');
+      setAccepted({ loading: false, error: '', tasks: data });
+    } catch (failure) { setAccepted(state => ({ ...state, loading: false, error: failure.message })); }
+  }, []);
+  useEffect(() => { loadAccepted(); }, [loadAccepted]);
+  async function finish(taskId) {
+    setFinishError('');
+    try { await apiFetch(`/tasks/${taskId}/finish`, { method: 'POST' }); }
+    catch (failure) {
+      setFinishError(failure.message);
+      await Promise.all([loadAccepted(), loadFinished()]);
+      return;
+    }
+    await Promise.all([loadAccepted(), loadFinished()]);
+  }
   async function apply(taskId, message) {
     try { await apiFetch('/applications/apply', { method: 'POST', body: JSON.stringify({ taskId, message }) }); }
     catch (failure) { await load(); throw failure; }
@@ -63,7 +85,13 @@ export default function SitterDashboard({ user, onLogout }) {
           {error && <div className="mb-4"><p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p><button onClick={load} disabled={loading} className="mt-3 rounded-md px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60">Retry</button></div>}
           {ready && <AvailableTasks tasks={tasks} appliedIds={appliedIds} onApply={apply} disabled={loading || Boolean(error)} />}
         </section>
-        <section className={panel} aria-labelledby="accepted-heading"><h2 id="accepted-heading" className="text-lg font-semibold">Accepted Tasks</h2><p className="mt-4 text-sm text-slate-600">Accepted task tracking is coming soon.</p></section>
+        <section className={panel} aria-labelledby="accepted-heading" aria-busy={accepted.loading}>
+          <h2 id="accepted-heading" className="mb-4 text-lg font-semibold">Accepted Tasks</h2>
+          {finishError && <p role="alert" className="mb-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{finishError}</p>}
+          {accepted.loading && <p role="status" className="mb-4 text-sm text-slate-600">Loading accepted tasks…</p>}
+          {accepted.error ? <div><p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{accepted.error}</p><button onClick={loadAccepted} disabled={accepted.loading} className="mt-3 rounded-md px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">Retry</button></div>
+            : !accepted.loading && <AcceptedTasks tasks={accepted.tasks} onFinish={finish} />}
+        </section>
         <section className={panel} aria-labelledby="finished-heading" aria-busy={finished.loading}>
           <h2 id="finished-heading" className="mb-4 text-lg font-semibold">Finished &amp; Reviews</h2>
           {finished.loading ? <p role="status" className="text-sm text-slate-600">Loading finished tasks…</p>

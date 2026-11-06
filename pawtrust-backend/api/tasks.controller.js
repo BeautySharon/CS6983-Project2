@@ -57,6 +57,27 @@ function parseTaskFields(body, { partial }) {
 }
 
 export default class TasksController {
+  static async apiGetAcceptedTasks(req, res) {
+    try {
+      return res.json(await TasksDAO.getAcceptedTasksBySitterId(req.user.id));
+    } catch (e) {
+      console.error(`apiGetAcceptedTasks failed: ${e}`);
+      return res.status(500).json({ error: "Could not load accepted tasks" });
+    }
+  }
+
+  static async apiFinishTask(req, res) {
+    if (!isValidTaskId(req.params.taskId)) return res.status(400).json({ error: "Invalid task id" });
+    try {
+      const result = await TasksDAO.finishTask(req.params.taskId, req.user.id);
+      if (result.error) return res.status(result.status).json({ error: result.error });
+      return res.json(result.task);
+    } catch (e) {
+      console.error(`apiFinishTask failed: ${e}`);
+      return res.status(500).json({ error: "Could not finish task" });
+    }
+  }
+
   static async apiPostTask(req, res) {
     const { error, fields } = parseTaskFields(req.body ?? {}, { partial: false });
     if (error) return res.status(400).json({ error });
