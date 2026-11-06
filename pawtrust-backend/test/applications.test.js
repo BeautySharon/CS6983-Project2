@@ -175,6 +175,38 @@ describe("Sitter applications API", () => {
     itRejectsBadTokensAndOwners((headers) => apply(headers, { taskId }));
   });
 
+  // Regression for PR #29 review: an application must never be left
+  // "pending" on a task whose sitter has already been accepted (BR-3/BR-4).
+  describe("apply vs. accept", () => {
+    const accept = (taskId, applicationId) =>
+      request(app).post("/pawtrust/accept").set(OWNER).send({ taskId, applicationId });
+
+    it("400 when applying after another sitter was accepted", async () => {
+      const taskId = await insertTask();
+      const first = await apply(OTHER_SITTER, { taskId });
+      expect((await accept(taskId, first.body._id)).status).to.equal(200);
+
+      const res = await apply(SITTER, { taskId });
+      expect(res.status).to.equal(400);
+      expect(await testDb.collection("applications").countDocuments({ sitterId: new ObjectId(SITTER_ID) })).to.equal(0);
+    });
+
+    it("never leaves a pending application on an assigned task when they race", async () => {
+      for (let round = 0; round < 15; round += 1) {
+        const taskId = await insertTask();
+        const first = await apply(OTHER_SITTER, { taskId });
+        const [accepted, applied] = await Promise.all([accept(taskId, first.body._id), apply(SITTER, { taskId })]);
+
+        expect(accepted.status).to.equal(200);
+        expect([201, 400]).to.include(applied.status);
+        const task = await testDb.collection("tasks").findOne({ _id: new ObjectId(taskId) });
+        expect(task.status).to.equal("assigned");
+        const pending = await testDb.collection("applications").countDocuments({ taskId: new ObjectId(taskId), status: "pending" });
+        expect(pending, `round ${round}`).to.equal(0);
+      }
+    });
+  });
+
   describe("GET /pawtrust/applications/mine", () => {
     it("lists only my applications, newest first", async () => {
       const first = await insertTask();
