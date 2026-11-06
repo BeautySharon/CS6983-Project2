@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AvailableTasks from '../components/AvailableTasks';
+import FinishedReviews from '../components/FinishedReviews';
 import { apiFetch } from '../api/client';
 
 const panel = 'min-w-0 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 lg:col-span-4';
@@ -26,6 +27,16 @@ export default function SitterDashboard({ user, onLogout }) {
     finally { if (id === request.current) setLoading(false); }
   }, []);
   useEffect(() => { load(); return () => { request.current += 1; }; }, [load]);
+  const [finished, setFinished] = useState({ loading: true, error: '', tasks: [] });
+  const loadFinished = useCallback(async () => {
+    setFinished(state => ({ ...state, loading: true, error: '' }));
+    try {
+      const data = await apiFetch('/tasks/finished');
+      if (!Array.isArray(data)) throw new Error('The service returned an unreadable finished-task list. Please try again.');
+      setFinished({ loading: false, error: '', tasks: data });
+    } catch (failure) { setFinished({ loading: false, error: failure.message, tasks: [] }); }
+  }, []);
+  useEffect(() => { loadFinished(); }, [loadFinished]);
   async function apply(taskId, message) {
     try { await apiFetch('/applications/apply', { method: 'POST', body: JSON.stringify({ taskId, message }) }); }
     catch (failure) { await load(); throw failure; }
@@ -53,7 +64,12 @@ export default function SitterDashboard({ user, onLogout }) {
           {ready && <AvailableTasks tasks={tasks} appliedIds={appliedIds} onApply={apply} disabled={loading || Boolean(error)} />}
         </section>
         <section className={panel} aria-labelledby="accepted-heading"><h2 id="accepted-heading" className="text-lg font-semibold">Accepted Tasks</h2><p className="mt-4 text-sm text-slate-600">Accepted task tracking is coming soon.</p></section>
-        <section className={panel} aria-labelledby="finished-heading"><h2 id="finished-heading" className="text-lg font-semibold">Finished &amp; Reviews</h2><p className="mt-4 text-sm text-slate-600">Completed tasks and reviews are coming soon.</p></section>
+        <section className={panel} aria-labelledby="finished-heading" aria-busy={finished.loading}>
+          <h2 id="finished-heading" className="mb-4 text-lg font-semibold">Finished &amp; Reviews</h2>
+          {finished.loading ? <p role="status" className="text-sm text-slate-600">Loading finished tasks…</p>
+            : finished.error ? <div><p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{finished.error}</p><button onClick={loadFinished} className="mt-3 rounded-md px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">Retry</button></div>
+            : <FinishedReviews tasks={finished.tasks} />}
+        </section>
       </div>
     </main>
   </div>;

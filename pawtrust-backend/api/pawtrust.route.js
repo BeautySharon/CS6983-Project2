@@ -2,6 +2,7 @@ import express from "express";
 import UsersController from "./users.controller.js";
 import TasksController from "./tasks.controller.js";
 import ApplicationsController from "./applications.controller.js";
+import ReviewsController from "./reviews.controller.js";
 import { requireAuth, requireRole } from "./middleware/auth.js";
 
 import OwnerApplicationsController from './ownerApplications.controller.js';
@@ -26,5 +27,10 @@ const sitterOnly = [requireAuth, requireRole("sitter")];
 router.get("/tasks/available", ...sitterOnly, TasksController.apiGetAvailableTasks);
 router.post("/applications/apply", ...sitterOnly, ApplicationsController.apiApplyToTask);
 router.get("/applications/mine", ...sitterOnly, ApplicationsController.apiGetMyApplications);
+router.get("/tasks/finished", ...sitterOnly, TasksController.apiGetFinishedTasks);
+
+router.post("/reviews", ...ownerOnly, ReviewsController.apiPostReview);
+router.get("/reviews/sitter/:sitterId", requireAuth, ReviewsController.apiGetReviewsBySitter);
+router.get("/reviews/task/:taskId", requireAuth, ReviewsController.apiGetReviewByTask);
 
 export default router;

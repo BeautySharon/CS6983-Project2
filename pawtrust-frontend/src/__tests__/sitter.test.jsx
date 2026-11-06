@@ -14,6 +14,7 @@ function server({ initial = tasks.slice(0, 1), applied = [], status = 201, failR
   fetch.mockImplementation(async (url, options) => {
     if (options.method === 'POST') { if (status < 400) { submitted = true; applied = [{ taskId: 'task-0' }]; } return reply(status < 400 ? { ok: true } : { error: 'Application rejected' }, status); }
     if (submitted && failRefresh) throw new TypeError('Offline');
+    if (url.endsWith('/tasks/finished')) return reply([]);
     return reply(url.endsWith('/applications/mine') ? applied : initial);
   });
 }
@@ -36,7 +37,9 @@ it('submits only taskId and message with Bearer authentication, then refetches',
   expect(await screen.findByRole('button', { name: 'Applied', exact: true })).toBeDisabled();
   const [url, options] = fetch.mock.calls.find(([, options]) => options.method === 'POST');
   expect(url).toMatch(/\/pawtrust\/applications\/apply$/); expect(JSON.parse(options.body)).toEqual({ taskId: 'task-0', message: 'Happy to help' });
-  expect(options.headers.get('Authorization')).toBe('Bearer test-token'); expect(fetch).toHaveBeenCalledTimes(5);
+  expect(options.headers.get('Authorization')).toBe('Bearer test-token');
+  // 2 initial loads + /tasks/finished, the apply POST, then 2 refetches.
+  expect(fetch).toHaveBeenCalledTimes(6);
 });
 it('accepts an empty optional message', async () => {
   server(); const ui = dashboard(); await screen.findByText('Walk 0'); await ui.click(screen.getByRole('button', { name: 'Apply', exact: true }));
@@ -62,8 +65,9 @@ it.each([400, 403, 409])('retains the message and displays a %s error without cl
 });
 it('shows an unavailable state and retries without inventing tasks', async () => {
   fetch.mockRejectedValue(new TypeError('Offline')); const ui = dashboard();
-  expect(await screen.findByRole('alert')).toHaveTextContent('Unable to connect'); expect(screen.queryByText('No open tasks right now')).not.toBeInTheDocument();
-  server({ initial: [] }); await ui.click(screen.getByRole('button', { name: 'Retry' })); expect(await screen.findByText('No open tasks right now')).toBeInTheDocument();
+  const available = within(screen.getByRole('region', { name: 'Available Tasks' }));
+  expect(await available.findByRole('alert')).toHaveTextContent('Unable to connect'); expect(screen.queryByText('No open tasks right now')).not.toBeInTheDocument();
+  server({ initial: [] }); await ui.click(available.getByRole('button', { name: 'Retry' })); expect(await screen.findByText('No open tasks right now')).toBeInTheDocument();
 });
 it('withholds Apply when application history fails to load', async () => {
   fetch.mockImplementation(async url => { if (url.endsWith('/applications/mine')) throw new TypeError('Offline'); return reply(tasks); });

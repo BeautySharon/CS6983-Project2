@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 
 const action = 'rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50';
 const colors = { open: 'bg-sky-50 text-sky-700 ring-sky-200', assigned: 'bg-amber-50 text-amber-700 ring-amber-200', finished: 'bg-emerald-50 text-emerald-700 ring-emerald-200' };
-function TaskCard({ task, onDelete, applications, onAccept }) {
+function TaskCard({ task, onDelete, applications, onAccept, onReview }) {
   const [confirming, setConfirming] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
@@ -24,6 +24,8 @@ function TaskCard({ task, onDelete, applications, onAccept }) {
         <p className="mt-1 break-words text-sm text-slate-600">{Number.isNaN(date.getTime()) ? 'Date unavailable' : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })} · {task.duration} hours · {task.location}</p>
       </div>
       <span className={`rounded-full px-2 py-1 text-xs capitalize ring-1 ${colors[task.status] || 'bg-slate-50 text-slate-600 ring-slate-200'}`}>{task.status}</span>
+      {task.status === 'finished' && task.reviewed && <span className="rounded-full bg-slate-50 px-2 py-1 text-xs text-slate-600 ring-1 ring-slate-200">Reviewed</span>}
+      {task.status === 'finished' && !task.reviewed && task.acceptedSitterId && onReview && <button onClick={() => onReview(task)} className={`${action} bg-indigo-600 text-white hover:bg-indigo-700`}>Review</button>}
       {task.status === 'open' && !confirming && <button ref={trigger} onClick={() => setConfirming(true)} className={`${action} text-rose-700 ring-1 ring-rose-300 hover:bg-rose-50`}>Delete</button>}
     </div>
     <p className="mt-3 whitespace-pre-wrap break-words text-sm text-slate-600">{task.description}</p>
@@ -38,13 +40,13 @@ function TaskCard({ task, onDelete, applications, onAccept }) {
     {error && <p role="alert" className="mt-3 text-sm text-rose-800">{error}</p>}
   </article>;
 }
-export default function TaskList({ tasks, onDelete, applications = [], onAccept }) {
+export default function TaskList({ tasks, onDelete, applications = [], onAccept, onReview }) {
   const [page, setPage] = useState(1);
   const pages = Math.max(1, Math.ceil(tasks.length / 3));
   const current = Math.min(page, pages);
   const sorted = [...tasks].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   return <>
-    {tasks.length === 0 ? <p className="py-8 text-sm text-slate-600">No tasks yet. Post your first task.</p> : <div className="space-y-4">{sorted.slice((current - 1) * 3, current * 3).map(task => <TaskCard key={task._id} task={task} onDelete={onDelete} applications={applications.filter(a => a.taskId === task._id)} onAccept={onAccept} />)}</div>}
+    {tasks.length === 0 ? <p className="py-8 text-sm text-slate-600">No tasks yet. Post your first task.</p> : <div className="space-y-4">{sorted.slice((current - 1) * 3, current * 3).map(task => <TaskCard key={task._id} task={task} onDelete={onDelete} applications={applications.filter(a => a.taskId === task._id)} onAccept={onAccept} onReview={onReview} />)}</div>}
     <nav aria-label="Task pagination" className="mt-4 flex flex-wrap items-center justify-end gap-3 text-sm">
       <button className={`${action} ring-1 ring-slate-300`} disabled={current === 1} onClick={() => setPage(current - 1)}>Prev</button>
       <span>Page {current} of {pages}</span>
