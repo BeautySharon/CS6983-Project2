@@ -23,6 +23,26 @@ export default class TasksDAO {
     applications = db.collection("applications");
   }
 
+  static async getAcceptedTasksBySitterId(sitterId) {
+    return tasks.find({ acceptedSitterId: this.toObjId(sitterId), status: "assigned" }).sort({ date: 1, _id: 1 }).toArray();
+  }
+
+  static async finishTask(taskId, sitterId) {
+    const _id = this.toObjId(taskId, "taskId");
+    const acceptedSitterId = this.toObjId(sitterId, "sitterId");
+    // Matching both identity and state makes simultaneous finishes safe.
+    const updated = await tasks.findOneAndUpdate(
+      { _id, acceptedSitterId, status: "assigned" },
+      { $set: { status: "finished", updatedAt: new Date() } },
+      { returnDocument: "after" },
+    );
+    if (updated.value) return { task: updated.value };
+    const current = await tasks.findOne({ _id });
+    if (!current) return { status: 404, error: "Task not found" };
+    if (!current.acceptedSitterId?.equals(acceptedSitterId)) return { status: 403, error: "Only the accepted sitter can finish this task" };
+    return { status: 409, error: "Task is no longer assigned. Refresh to see its current status." };
+  }
+
   static getClient() {
     return client;
   }

@@ -24,6 +24,8 @@ router.get('/applications/owner', ...ownerOnly, OwnerApplicationsController.apiG
 router.post('/accept', ...ownerOnly, OwnerApplicationsController.apiAccept);
 
 const sitterOnly = [requireAuth, requireRole("sitter")];
+router.get("/tasks/accepted", ...sitterOnly, TasksController.apiGetAcceptedTasks);
+router.post("/tasks/:taskId/finish", ...sitterOnly, TasksController.apiFinishTask);
 router.get("/tasks/available", ...sitterOnly, TasksController.apiGetAvailableTasks);
 router.post("/applications/apply", ...sitterOnly, ApplicationsController.apiApplyToTask);
 router.get("/applications/mine", ...sitterOnly, ApplicationsController.apiGetMyApplications);
