@@ -73,6 +73,11 @@ export default class TasksDAO {
       .toArray();
   }
 
+  // US-5: every open task, soonest date first.
+  static async getAvailableTasks() {
+    return tasks.find({ status: "open" }).sort({ date: 1, _id: 1 }).toArray();
+  }
+
   static async getTaskById(taskId) {
     return tasks.findOne({ _id: { $eq: TasksDAO.toObjId(taskId, "taskId") } });
   }

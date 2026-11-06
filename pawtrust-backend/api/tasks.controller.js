@@ -81,6 +81,15 @@ export default class TasksController {
     }
   }
 
+  static async apiGetAvailableTasks(req, res) {
+    try {
+      return res.json(await TasksDAO.getAvailableTasks());
+    } catch (e) {
+      console.error(`apiGetAvailableTasks failed: ${e}`);
+      return res.status(500).json({ error: "Could not load tasks" });
+    }
+  }
+
   static async apiUpdateTask(req, res) {
     if (!isValidTaskId(req.params.id)) return res.status(400).json({ error: "Invalid task id" });
     const { error, fields } = parseTaskFields(req.body ?? {}, { partial: true });
