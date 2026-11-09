@@ -73,3 +73,7 @@ CI reports checks; it does not configure branch protection or deploy.
 ## Deployment
 
 Live URLs will be added here once deployed (#17).
+
+## Automated browser tests
+
+See [E2E setup and coverage](tests/e2e/README.md) for the Playwright suite that runs the complete pet-care workflow against the real API and a local MongoDB replica set. The separate E2E workflow publishes an HTML report and failure traces in GitHub Actions.
