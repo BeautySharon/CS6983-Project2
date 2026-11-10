@@ -1,0 +1,78 @@
+name: E2E
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Chromium end-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      E2E_MONGO_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0&directConnection=true
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            pawtrust-frontend/package-lock.json
+            pawtrust-backend/package-lock.json
+            tests/e2e/package-lock.json
+      - run: npm ci --prefix pawtrust-frontend
+      - run: npm ci --prefix pawtrust-backend
+      - run: npm ci --prefix tests/e2e
+      - name: Install Chromium
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps chromium
+      - name: Start MongoDB replica set
+        timeout-minutes: 2
+        run: |
+          docker run --detach --name pawtrust-e2e-mongo \
+            --publish 127.0.0.1:27017:27017 \
+            mongo:7 --replSet rs0 --bind_ip_all
+          for attempt in $(seq 1 30); do
+            if docker exec pawtrust-e2e-mongo mongosh --quiet --eval 'quit(db.adminCommand({ping: 1}).ok ? 0 : 1)'; then
+              break
+            fi
+            sleep 2
+          done
+          docker exec pawtrust-e2e-mongo mongosh --quiet --eval '
+            const result = rs.initiate({_id: "rs0", members: [{_id: 0, host: "localhost:27017"}]});
+            if (!result.ok) throw new Error("Replica set initialization failed");
+            for (let attempt = 0; attempt < 60; attempt++) {
+              if (db.hello().isWritablePrimary) quit(0);
+              sleep(1000);
+            }
+            throw new Error("MongoDB did not become primary");
+          '
+      - run: npm test --prefix tests/e2e
+      - name: Upload browser report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: |
+            tests/e2e/playwright-report/
+            tests/e2e/test-results/
+          retention-days: 7
+      - name: MongoDB logs on failure
+        if: failure()
+        run: docker logs pawtrust-e2e-mongo
+      - name: Remove test database container
+        if: always()
+        run: docker rm --force --volumes pawtrust-e2e-mongo

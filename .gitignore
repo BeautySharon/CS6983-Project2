@@ -5,3 +5,7 @@ node_modules
 # old reference project, kept locally only
 pawtrust-backend-old/
 pawtrust-frontend-old/
+
+# Playwright reports may contain disposable test sessions.
+tests/e2e/playwright-report/
+tests/e2e/test-results/

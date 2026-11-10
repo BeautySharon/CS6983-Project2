@@ -328,3 +328,7 @@ cd pawtrust-frontend && npm install && npm run dev
 - `pawtrust_prod` is used only by the deployed backend — never by tests, seeds or local dev.
 - CORS allows only `CORS_ORIGIN` (and `localhost` in development). Add new env vars to `.env.example`.
 - `main` auto-deploys after CI passes; keep the live URLs in README.
+
+## E2E test entry point
+
+For browser regression tests, read `tests/e2e/README.md`. Run `npm test --prefix tests/e2e` with `E2E_MONGO_URI` pointing to a local MongoDB replica set. Keep the main journey connected to the real backend, use independent browser contexts for each role, and clean up only test-owned records. Do not run backend integration tests concurrently against the same `pawtrust_test` database. Generated reports and traces are not source files and must stay out of Git.
