@@ -11,6 +11,12 @@ A MERN web app connecting pet owners with pet sitters. See [`docs/PRD.md`](docs/
 
 The API runs on Render's free plan and sleeps after about 15 minutes without traffic, so the first request can take 30–60 seconds. Register your own owner and sitter accounts to try it; see [Deployment](#deployment) for a walkthrough.
 
+## API documentation
+
+The complete [OpenAPI 3.0 specification](docs/openapi.json) documents all 18 API operations, authentication, permissions, request and response schemas, errors and examples.
+
+Import `docs/openapi.json` into Swagger Editor or another OpenAPI viewer to browse the reference. The default server is local development; the production server is also listed. For protected requests, log in and use the returned JWT as a bearer token. List endpoints return full arrays; pagination is handled by the frontend.
+
 ## Local development
 
 Requirements: Node.js 22.23.4 (pinned in `.nvmrc`; run `nvm install && nvm use` from the repository root), a MongoDB connection string (Atlas, or a local MongoDB replica set for transaction tests).
