@@ -332,3 +332,7 @@ cd pawtrust-frontend && npm install && npm run dev
 ## E2E test entry point
 
 For browser regression tests, read `tests/e2e/README.md`. Run `npm test --prefix tests/e2e` with `E2E_MONGO_URI` pointing to a local MongoDB replica set. Keep the main journey connected to the real backend, use independent browser contexts for each role, and clean up only test-owned records. Do not run backend integration tests concurrently against the same `pawtrust_test` database. Generated reports and traces are not source files and must stay out of Git.
+
+## API documentation entry point
+
+Read `docs/openapi.json` before changing an API contract or its frontend consumer. Keep the relevant operations, schemas, permissions, error responses and examples aligned with implementation changes, and validate the specification before submitting an API documentation change.

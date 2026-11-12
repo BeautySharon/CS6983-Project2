@@ -1,0 +1,2891 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PawTrust API",
+    "version": "1.0.0",
+    "description": "REST API for pet-care tasks, sitter applications and reviews. Register an owner or sitter account, then log in to obtain a JWT. Protected operations use Authorization: Bearer <token>; permissions and acting identity come from the verified token. Lists return complete arrays without server-side pagination. Dates in responses are ISO 8601 timestamps; duration is in hours. Examples are illustrative."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/pawtrust",
+      "description": "Local development (adjust the port if configured differently)."
+    },
+    {
+      "url": "https://pawtrust-backend.onrender.com/pawtrust",
+      "description": "Production API."
+    }
+  ],
+  "paths": {
+    "/applications/owner": {
+      "get": {
+        "operationId": "getOwnerApplications",
+        "description": "Owner only. Lists applications for tasks owned by the authenticated owner, with sitterName. Oldest first by createdAt and _id. Empty result is []. No query parameters.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OwnerApplication"
+                  }
+                },
+                "examples": {
+                  "items": {
+                    "value": [
+                      {
+                        "_id": "507f1f77bcf86cd799439012",
+                        "taskId": "507f1f77bcf86cd799439011",
+                        "sitterId": "507f1f77bcf86cd799439014",
+                        "message": "I can help with the walk.",
+                        "status": "accepted",
+                        "createdAt": "2026-11-09T18:15:00Z",
+                        "sitterName": "Example Sitter"
+                      }
+                    ]
+                  },
+                  "empty": {
+                    "value": []
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid or expired JWT: Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role not permitted: Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not load applications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not load applications"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List applications for owned tasks",
+        "tags": [
+          "Owner acceptance"
+        ]
+      }
+    },
+    "/accept": {
+      "post": {
+        "operationId": "acceptApplication",
+        "description": "Owner only. In a transaction, assigns an open task, accepts the chosen pending application and rejects other applications. Identity comes from the token.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptResult"
+                },
+                "example": {
+                  "taskId": "507f1f77bcf86cd799439011",
+                  "applicationId": "507f1f77bcf86cd799439012",
+                  "status": "assigned"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid or expired JWT: Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Wrong role or task owned by another user: Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Valid taskId and applicationId are required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Valid taskId and applicationId are required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found; Application not found for this task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Task not found"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "Application not found for this task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Task is already assigned or closed; Application is no longer pending",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Task is already assigned or closed"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "Application is no longer pending"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not accept application",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not accept application"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptRequest"
+              },
+              "example": {
+                "taskId": "507f1f77bcf86cd799439011",
+                "applicationId": "507f1f77bcf86cd799439012"
+              }
+            }
+          }
+        },
+        "summary": "Accept one sitter",
+        "tags": [
+          "Owner acceptance"
+        ]
+      }
+    },
+    "/tasks/accepted": {
+      "get": {
+        "operationId": "getAcceptedTasks",
+        "description": "Sitter only. Returns assigned tasks whose acceptedSitterId matches the authenticated sitter. Sorted by date and _id ascending. Empty result is []. No query parameters.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Task"
+                  }
+                },
+                "examples": {
+                  "items": {
+                    "value": [
+                      {
+                        "_id": "507f1f77bcf86cd799439011",
+                        "ownerId": "507f1f77bcf86cd799439013",
+                        "petType": "Dog",
+                        "description": "Walk and feed the dog.",
+                        "location": "Boston",
+                        "date": "2026-11-15T18:00:00Z",
+                        "duration": 2,
+                        "status": "assigned",
+                        "acceptedSitterId": "507f1f77bcf86cd799439014",
+                        "reviewed": false,
+                        "createdAt": "2026-11-09T18:00:00Z",
+                        "updatedAt": "2026-11-09T18:30:00Z"
+                      }
+                    ]
+                  },
+                  "empty": {
+                    "value": []
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid or expired JWT: Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role not permitted: Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not load accepted tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not load accepted tasks"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List the sitter’s assigned tasks",
+        "tags": [
+          "Task completion"
+        ]
+      }
+    },
+    "/tasks/{taskId}/finish": {
+      "post": {
+        "operationId": "finishTask",
+        "description": "Only the assigned sitter can finish an assigned task. Performs a conditional atomic update and returns the persisted task. No request body is required; identity comes from the token.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                },
+                "example": {
+                  "_id": "507f1f77bcf86cd799439011",
+                  "ownerId": "507f1f77bcf86cd799439013",
+                  "petType": "Dog",
+                  "description": "Walk and feed the dog.",
+                  "location": "Boston",
+                  "date": "2026-11-15T18:00:00Z",
+                  "duration": 2,
+                  "status": "finished",
+                  "acceptedSitterId": "507f1f77bcf86cd799439014",
+                  "reviewed": false,
+                  "createdAt": "2026-11-09T18:00:00Z",
+                  "updatedAt": "2026-11-15T20:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid or expired JWT: Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden; Only the accepted sitter can finish this task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "Only the accepted sitter can finish this task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid task id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Invalid task id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Task not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Task is no longer assigned. Refresh to see its current status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Task is no longer assigned. Refresh to see its current status."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not finish task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not finish task"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          }
+        ],
+        "summary": "Mark an assigned task as finished",
+        "tags": [
+          "Task completion"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "summary": "Check API health",
+        "tags": [
+          "Health"
+        ],
+        "description": "Public. Liveness check; does not query the database.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                },
+                "example": {
+                  "status": "ok"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "operationId": "registerUser",
+        "summary": "Register an account",
+        "tags": [
+          "Authentication"
+        ],
+        "description": "Public. Returns a safe user object without a password hash. No JWT is returned; log in after registration.",
+        "security": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResult"
+                },
+                "example": {
+                  "user": {
+                    "_id": "507f1f77bcf86cd799439013",
+                    "name": "Example Owner",
+                    "email": "owner@example.com",
+                    "userType": "owner",
+                    "location": "Boston",
+                    "bio": "",
+                    "createdAt": "2026-11-09T17:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Name is required; A valid email is required; Password must be at least 8 characters; userType must be owner or sitter; Location is required; Bio must be text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Name is required"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "A valid email is required"
+                    }
+                  },
+                  "case3": {
+                    "value": {
+                      "error": "Password must be at least 8 characters"
+                    }
+                  },
+                  "case4": {
+                    "value": {
+                      "error": "userType must be owner or sitter"
+                    }
+                  },
+                  "case5": {
+                    "value": {
+                      "error": "Location is required"
+                    }
+                  },
+                  "case6": {
+                    "value": {
+                      "error": "Bio must be text"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Email already registered"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Registration failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Registration failed"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              },
+              "example": {
+                "name": "Example Owner",
+                "email": "owner@example.com",
+                "password": "example-password",
+                "userType": "owner",
+                "location": "Boston"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "operationId": "loginUser",
+        "summary": "Log in",
+        "tags": [
+          "Authentication"
+        ],
+        "description": "Public. Returns an HS256 JWT valid for one day. Unknown email and wrong password use the same 401 response.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResult"
+                },
+                "example": {
+                  "token": "<JWT>",
+                  "user": {
+                    "_id": "507f1f77bcf86cd799439013",
+                    "name": "Example Owner",
+                    "email": "owner@example.com",
+                    "userType": "owner",
+                    "location": "Boston",
+                    "bio": "",
+                    "createdAt": "2026-11-09T17:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email and password are required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Email and password are required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid email or password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Invalid email or password"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Login failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Login failed"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "example": {
+                "email": "owner@example.com",
+                "password": "example-password"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "post": {
+        "operationId": "createTask",
+        "summary": "Post a care task",
+        "tags": [
+          "Tasks"
+        ],
+        "description": "Owner only. Creates an open task. ownerId comes from the token; supplied identity/status fields and other unknown fields are ignored.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerTask"
+                },
+                "example": {
+                  "_id": "507f1f77bcf86cd799439011",
+                  "ownerId": "507f1f77bcf86cd799439013",
+                  "petType": "Dog",
+                  "description": "Walk and feed the dog.",
+                  "location": "Boston",
+                  "date": "2026-11-15T18:00:00Z",
+                  "duration": 2,
+                  "status": "open",
+                  "acceptedSitterId": null,
+                  "reviewed": false,
+                  "createdAt": "2026-11-09T18:00:00Z",
+                  "updatedAt": "2026-11-15T20:00:00Z",
+                  "applicationCount": 0
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "petType is required; description is required; location is required; date is required; duration is required; petType must be a non-empty string; description must be a non-empty string; location must be a non-empty string; date must be a valid date; date must be in the future; duration must be a number greater than 0",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "petType is required"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "description is required"
+                    }
+                  },
+                  "case3": {
+                    "value": {
+                      "error": "location is required"
+                    }
+                  },
+                  "case4": {
+                    "value": {
+                      "error": "date is required"
+                    }
+                  },
+                  "case5": {
+                    "value": {
+                      "error": "duration is required"
+                    }
+                  },
+                  "case6": {
+                    "value": {
+                      "error": "petType must be a non-empty string"
+                    }
+                  },
+                  "case7": {
+                    "value": {
+                      "error": "description must be a non-empty string"
+                    }
+                  },
+                  "case8": {
+                    "value": {
+                      "error": "location must be a non-empty string"
+                    }
+                  },
+                  "case9": {
+                    "value": {
+                      "error": "date must be a valid date"
+                    }
+                  },
+                  "case10": {
+                    "value": {
+                      "error": "date must be in the future"
+                    }
+                  },
+                  "case11": {
+                    "value": {
+                      "error": "duration must be a number greater than 0"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not create task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not create task"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              },
+              "example": {
+                "petType": "Dog",
+                "description": "Walk and feed the dog.",
+                "location": "Boston",
+                "date": "2030-11-15T18:00:00Z",
+                "duration": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/mine": {
+      "get": {
+        "operationId": "getMyTasks",
+        "summary": "List owned tasks",
+        "tags": [
+          "Tasks"
+        ],
+        "description": "Owner only. Newest first by createdAt and _id. Includes applicationCount. Empty list is []. No query parameters.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OwnerTask"
+                  }
+                },
+                "example": [
+                  {
+                    "_id": "507f1f77bcf86cd799439011",
+                    "ownerId": "507f1f77bcf86cd799439013",
+                    "petType": "Dog",
+                    "description": "Walk and feed the dog.",
+                    "location": "Boston",
+                    "date": "2026-11-15T18:00:00Z",
+                    "duration": 2,
+                    "status": "open",
+                    "acceptedSitterId": null,
+                    "reviewed": false,
+                    "createdAt": "2026-11-09T18:00:00Z",
+                    "updatedAt": "2026-11-15T20:00:00Z",
+                    "applicationCount": 0
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not load tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not load tasks"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{id}": {
+      "put": {
+        "operationId": "updateTask",
+        "summary": "Edit an open task",
+        "tags": [
+          "Tasks"
+        ],
+        "description": "Owner only. Only the task owner can edit an open task. At least one editable field is required; other fields are ignored. A supplied date must be in the future.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                },
+                "example": {
+                  "_id": "507f1f77bcf86cd799439011",
+                  "ownerId": "507f1f77bcf86cd799439013",
+                  "petType": "Dog",
+                  "description": "Walk and feed the dog.",
+                  "location": "Boston",
+                  "date": "2026-11-15T18:00:00Z",
+                  "duration": 2,
+                  "status": "open",
+                  "acceptedSitterId": null,
+                  "reviewed": false,
+                  "createdAt": "2026-11-09T18:00:00Z",
+                  "updatedAt": "2026-11-15T20:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid task id; Provide at least one of: petType, description, location, date, duration; Only open tasks can be changed; petType must be a non-empty string; description must be a non-empty string; location must be a non-empty string; date must be a valid date; date must be in the future; duration must be a number greater than 0",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Invalid task id"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "Provide at least one of: petType, description, location, date, duration"
+                    }
+                  },
+                  "case3": {
+                    "value": {
+                      "error": "Only open tasks can be changed"
+                    }
+                  },
+                  "case4": {
+                    "value": {
+                      "error": "petType must be a non-empty string"
+                    }
+                  },
+                  "case5": {
+                    "value": {
+                      "error": "description must be a non-empty string"
+                    }
+                  },
+                  "case6": {
+                    "value": {
+                      "error": "location must be a non-empty string"
+                    }
+                  },
+                  "case7": {
+                    "value": {
+                      "error": "date must be a valid date"
+                    }
+                  },
+                  "case8": {
+                    "value": {
+                      "error": "date must be in the future"
+                    }
+                  },
+                  "case9": {
+                    "value": {
+                      "error": "duration must be a number greater than 0"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Task not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not update task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not update task"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskRequest"
+              },
+              "example": {
+                "duration": 3
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteTask",
+        "summary": "Delete an open task",
+        "tags": [
+          "Tasks"
+        ],
+        "description": "Owner only. Only the task owner can delete an open task. Also removes its applications. A repeated delete returns 404. No request body.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResult"
+                },
+                "example": {
+                  "deletedId": "507f1f77bcf86cd799439011"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid task id; Only open tasks can be changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Invalid task id"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "Only open tasks can be changed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Task not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not delete task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not delete task"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          }
+        ]
+      }
+    },
+    "/tasks/available": {
+      "get": {
+        "operationId": "getAvailableTasks",
+        "summary": "Browse available tasks",
+        "tags": [
+          "Tasks"
+        ],
+        "description": "Sitter only. All open tasks, ordered by date and _id ascending. Empty list is []. No query parameters.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Task"
+                  }
+                },
+                "example": [
+                  {
+                    "_id": "507f1f77bcf86cd799439011",
+                    "ownerId": "507f1f77bcf86cd799439013",
+                    "petType": "Dog",
+                    "description": "Walk and feed the dog.",
+                    "location": "Boston",
+                    "date": "2026-11-15T18:00:00Z",
+                    "duration": 2,
+                    "status": "open",
+                    "acceptedSitterId": null,
+                    "reviewed": false,
+                    "createdAt": "2026-11-09T18:00:00Z",
+                    "updatedAt": "2026-11-15T20:00:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not load tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not load tasks"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/apply": {
+      "post": {
+        "operationId": "applyToTask",
+        "summary": "Apply to a care task",
+        "tags": [
+          "Applications"
+        ],
+        "description": "Sitter only. Only open tasks accept applications, once per sitter per task. A transaction coordinates the open-state check and insert with concurrent acceptance. sitterId comes from the token.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                },
+                "example": {
+                  "_id": "507f1f77bcf86cd799439012",
+                  "taskId": "507f1f77bcf86cd799439011",
+                  "sitterId": "507f1f77bcf86cd799439014",
+                  "message": "I can help with the walk.",
+                  "status": "pending",
+                  "createdAt": "2026-11-09T18:15:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A valid taskId is required; message must be a string; message must be at most 300 characters; Only open tasks accept applications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "A valid taskId is required"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "message must be a string"
+                    }
+                  },
+                  "case3": {
+                    "value": {
+                      "error": "message must be at most 300 characters"
+                    }
+                  },
+                  "case4": {
+                    "value": {
+                      "error": "Only open tasks accept applications"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Task not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "You have already applied to this task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "You have already applied to this task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not apply to task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not apply to task"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyRequest"
+              },
+              "example": {
+                "taskId": "507f1f77bcf86cd799439011",
+                "message": "I can help with the walk."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/mine": {
+      "get": {
+        "operationId": "getMyApplications",
+        "summary": "List submitted applications",
+        "tags": [
+          "Applications"
+        ],
+        "description": "Sitter only. Returns the authenticated sitter’s applications, newest first by createdAt and _id. Status is pending, accepted or rejected. Empty list is []. No query parameters.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Application"
+                  }
+                },
+                "example": [
+                  {
+                    "_id": "507f1f77bcf86cd799439012",
+                    "taskId": "507f1f77bcf86cd799439011",
+                    "sitterId": "507f1f77bcf86cd799439014",
+                    "message": "I can help with the walk.",
+                    "status": "pending",
+                    "createdAt": "2026-11-09T18:15:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not load applications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not load applications"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/finished": {
+      "get": {
+        "operationId": "getFinishedTasks",
+        "summary": "List completed care and reviews",
+        "tags": [
+          "Tasks"
+        ],
+        "description": "Sitter only. Finished tasks assigned to this sitter, newest updatedAt and _id first. Each includes review, or null when not yet reviewed. Empty list is []. No query parameters.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FinishedTask"
+                  }
+                },
+                "example": [
+                  {
+                    "_id": "507f1f77bcf86cd799439011",
+                    "ownerId": "507f1f77bcf86cd799439013",
+                    "petType": "Dog",
+                    "description": "Walk and feed the dog.",
+                    "location": "Boston",
+                    "date": "2026-11-15T18:00:00Z",
+                    "duration": 2,
+                    "status": "finished",
+                    "acceptedSitterId": "507f1f77bcf86cd799439014",
+                    "reviewed": true,
+                    "createdAt": "2026-11-09T18:00:00Z",
+                    "updatedAt": "2026-11-15T20:00:00Z",
+                    "review": {
+                      "_id": "507f1f77bcf86cd799439015",
+                      "taskId": "507f1f77bcf86cd799439011",
+                      "ownerId": "507f1f77bcf86cd799439013",
+                      "sitterId": "507f1f77bcf86cd799439014",
+                      "rating": 5,
+                      "comment": "Reliable and helpful.",
+                      "createdAt": "2026-11-15T21:00:00Z"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not load finished tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not load finished tasks"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reviews": {
+      "post": {
+        "operationId": "createReview",
+        "summary": "Review a completed task",
+        "tags": [
+          "Reviews"
+        ],
+        "description": "Owner only. Only the owner of a finished task with an accepted sitter can review it, once per task. Saving the review and marking the task reviewed run in a transaction. ownerId comes from the token and sitterId from the task.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                },
+                "example": {
+                  "_id": "507f1f77bcf86cd799439015",
+                  "taskId": "507f1f77bcf86cd799439011",
+                  "ownerId": "507f1f77bcf86cd799439013",
+                  "sitterId": "507f1f77bcf86cd799439014",
+                  "rating": 5,
+                  "comment": "Reliable and helpful.",
+                  "createdAt": "2026-11-15T21:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A valid taskId is required; rating must be an integer from 1 to 5; comment must be a string; comment must be at most 500 characters; Only finished tasks with an accepted sitter can be reviewed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "A valid taskId is required"
+                    }
+                  },
+                  "case2": {
+                    "value": {
+                      "error": "rating must be an integer from 1 to 5"
+                    }
+                  },
+                  "case3": {
+                    "value": {
+                      "error": "comment must be a string"
+                    }
+                  },
+                  "case4": {
+                    "value": {
+                      "error": "comment must be at most 500 characters"
+                    }
+                  },
+                  "case5": {
+                    "value": {
+                      "error": "Only finished tasks with an accepted sitter can be reviewed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Task not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "This task has already been reviewed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "This task has already been reviewed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not save review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not save review"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              },
+              "example": {
+                "taskId": "507f1f77bcf86cd799439011",
+                "rating": 5,
+                "comment": "Reliable and helpful."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reviews/sitter/{sitterId}": {
+      "get": {
+        "operationId": "getSitterReviews",
+        "summary": "Get sitter reviews and average rating",
+        "tags": [
+          "Reviews"
+        ],
+        "description": "Any authenticated user. Reviews are newest first. Average is rounded to one decimal. No reviews returns reviews: [], averageRating: null, count: 0; an unknown valid ID also returns this empty result.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitterReviews"
+                },
+                "example": {
+                  "reviews": [
+                    {
+                      "_id": "507f1f77bcf86cd799439015",
+                      "taskId": "507f1f77bcf86cd799439011",
+                      "ownerId": "507f1f77bcf86cd799439013",
+                      "sitterId": "507f1f77bcf86cd799439014",
+                      "rating": 5,
+                      "comment": "Reliable and helpful.",
+                      "createdAt": "2026-11-15T21:00:00Z"
+                    }
+                  ],
+                  "averageRating": 5,
+                  "count": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid sitter id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Invalid sitter id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not load reviews",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not load reviews"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sitterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          }
+        ]
+      }
+    },
+    "/reviews/task/{taskId}": {
+      "get": {
+        "operationId": "getTaskReview",
+        "summary": "Get a task review",
+        "tags": [
+          "Reviews"
+        ],
+        "description": "Any authenticated user. Returns the review associated with this task. Any authenticated owner or sitter may read it.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                },
+                "example": {
+                  "_id": "507f1f77bcf86cd799439015",
+                  "taskId": "507f1f77bcf86cd799439011",
+                  "ownerId": "507f1f77bcf86cd799439013",
+                  "sitterId": "507f1f77bcf86cd799439014",
+                  "rating": 5,
+                  "comment": "Reliable and helpful.",
+                  "createdAt": "2026-11-15T21:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid task id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Invalid task id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Review not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Review not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Could not load review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "case1": {
+                    "value": {
+                      "error": "Could not load review"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "ObjectId": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{24}$",
+        "example": "507f1f77bcf86cd799439011"
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "ownerId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "petType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration": {
+            "type": "number",
+            "description": "Hours"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "assigned",
+              "finished"
+            ]
+          },
+          "acceptedSitterId": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^[0-9a-fA-F]{24}$"
+          },
+          "reviewed": {
+            "type": "boolean"
+          },
+          "lastAppliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Present after an application is submitted."
+          }
+        },
+        "required": [
+          "_id",
+          "ownerId",
+          "petType",
+          "description",
+          "date",
+          "duration",
+          "location",
+          "status",
+          "acceptedSitterId",
+          "reviewed",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "OwnerApplication": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "taskId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "sitterId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "sitterName": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "_id",
+          "taskId",
+          "sitterId",
+          "message",
+          "status",
+          "createdAt",
+          "sitterName"
+        ]
+      },
+      "AcceptRequest": {
+        "type": "object",
+        "required": [
+          "taskId",
+          "applicationId"
+        ],
+        "properties": {
+          "taskId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "applicationId": {
+            "$ref": "#/components/schemas/ObjectId"
+          }
+        }
+      },
+      "AcceptResult": {
+        "type": "object",
+        "required": [
+          "taskId",
+          "applicationId",
+          "status"
+        ],
+        "properties": {
+          "taskId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "applicationId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "assigned"
+            ]
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "userType": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "sitter"
+            ]
+          },
+          "location": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "_id",
+          "name",
+          "email",
+          "userType",
+          "location",
+          "bio",
+          "createdAt"
+        ]
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "email": {
+            "type": "string",
+            "description": "Email is trimmed, validated and lowercased.",
+            "pattern": "^[\\s]*[^\\s@]+@[^\\s@]+\\.[^\\s@]+[\\s]*$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "writeOnly": true
+          },
+          "userType": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "sitter"
+            ]
+          },
+          "location": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "bio": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password",
+          "userType",
+          "location"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RegisterResult": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "LoginResult": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "HS256 JWT, expires after one day."
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "token",
+          "user"
+        ]
+      },
+      "CreateTaskRequest": {
+        "type": "object",
+        "properties": {
+          "petType": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "description": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "location": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "date": {
+            "type": "string",
+            "description": "A date string accepted by JavaScript Date; must be in the future. Use an ISO 8601 timestamp with timezone."
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "description": "Hours."
+          }
+        },
+        "required": [
+          "petType",
+          "description",
+          "location",
+          "date",
+          "duration"
+        ]
+      },
+      "UpdateTaskRequest": {
+        "type": "object",
+        "properties": {
+          "petType": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "description": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "location": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Must contain non-whitespace text; trimmed before storage."
+          },
+          "date": {
+            "type": "string",
+            "description": "A date string accepted by JavaScript Date; must be in the future. Use an ISO 8601 timestamp with timezone."
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "description": "Hours."
+          }
+        },
+        "anyOf": [
+          {
+            "required": [
+              "petType"
+            ]
+          },
+          {
+            "required": [
+              "description"
+            ]
+          },
+          {
+            "required": [
+              "location"
+            ]
+          },
+          {
+            "required": [
+              "date"
+            ]
+          },
+          {
+            "required": [
+              "duration"
+            ]
+          }
+        ]
+      },
+      "OwnerTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Task"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "applicationCount": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "applicationCount"
+            ]
+          }
+        ]
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "taskId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "sitterId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "_id",
+          "taskId",
+          "sitterId",
+          "message",
+          "status",
+          "createdAt"
+        ]
+      },
+      "ApplyRequest": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional; trimmed before validation. At most 300 characters after trimming.",
+            "default": ""
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "ReviewRequest": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string",
+            "description": "Optional; trimmed before validation. At most 500 characters after trimming.",
+            "default": ""
+          }
+        },
+        "required": [
+          "taskId",
+          "rating"
+        ]
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "taskId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "ownerId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "sitterId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "_id",
+          "taskId",
+          "ownerId",
+          "sitterId",
+          "rating",
+          "comment",
+          "createdAt"
+        ]
+      },
+      "FinishedTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Task"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "review": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "$ref": "#/components/schemas/ObjectId"
+                  },
+                  "taskId": {
+                    "$ref": "#/components/schemas/ObjectId"
+                  },
+                  "ownerId": {
+                    "$ref": "#/components/schemas/ObjectId"
+                  },
+                  "sitterId": {
+                    "$ref": "#/components/schemas/ObjectId"
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "comment": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "_id",
+                  "taskId",
+                  "ownerId",
+                  "sitterId",
+                  "rating",
+                  "comment",
+                  "createdAt"
+                ],
+                "nullable": true
+              }
+            },
+            "required": [
+              "review"
+            ]
+          }
+        ]
+      },
+      "SitterReviews": {
+        "type": "object",
+        "properties": {
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
+          },
+          "averageRating": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Rounded to one decimal; null when there are no reviews."
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "reviews",
+          "averageRating",
+          "count"
+        ]
+      },
+      "DeleteResult": {
+        "type": "object",
+        "properties": {
+          "deletedId": {
+            "$ref": "#/components/schemas/ObjectId"
+          }
+        },
+        "required": [
+          "deletedId"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Authentication"
+    },
+    {
+      "name": "Tasks"
+    },
+    {
+      "name": "Applications"
+    },
+    {
+      "name": "Owner acceptance"
+    },
+    {
+      "name": "Task completion"
+    },
+    {
+      "name": "Reviews"
+    }
+  ]
+}
