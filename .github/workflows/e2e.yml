@@ -22,7 +22,7 @@ jobs:
     env:
       E2E_MONGO_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0&directConnection=true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/setup-node@v6
